@@ -290,6 +290,7 @@ object PostgresDriver {
     }
 
     // =====================================================================
+    // =====================================================================
     // 🚀 FUNCIÓN ESTRELLA REFACTORIZADA: ORDEN CRONOLÓGICO STRICTO DESCENDENTE
     // =====================================================================
     suspend fun obtenerDashboardPredictivoDDJJ(rucInput: String): List<ObligacionSunat> = withContext(Dispatchers.IO) {
@@ -316,7 +317,6 @@ object PostgresDriver {
             ORDER BY v.periodo DESC
         """.trimIndent()
 
-
         var conexion: Connection? = null
         try {
             conexion = getConnection()
@@ -332,13 +332,14 @@ object PostgresDriver {
                                 periodo = rs.getString("periodo") ?: "",
                                 fechaVencimiento = rs.getString("venc_formateado") ?: "",
                                 numOrden = rs.getString("num_orden"),
-                                fechaPresentacion = rs.getString("presenta_formateado"),
+                                fechaPresentacion = rs.getString("presenta_formateada"),
                                 totalPagado = rs.getDouble("total_pagado"),
                                 colorSemaforo = rs.getString("color_semaforo") ?: "GRIS",
                                 estadoDescripcion = rs.getString("estado_descripcion") ?: "Pendiente",
                                 ordenPrioridad = rs.getInt("orden_prioridad"),
-                                urlPdfConstancia = rs.getString("url_constancia") ?: "",
-                                urlPdfDetallePdt = rs.getString("url_detalle") ?: ""
+                                // 🎯 CORREGIDO: Se añadieron los prefijos _pdf_ para que coincidan exactamente con el SELECT de arriba
+                                urlPdfConstancia = rs.getString("url_pdf_constancia") ?: "",
+                                urlPdfDetallePdt = rs.getString("url_pdf_detalle") ?: ""
                             )
                         )
                     }
@@ -360,37 +361,27 @@ object PostgresDriver {
         val listaTemporal = mutableListOf<PlanillaAfpEntidad>()
 
         val query = """
-            SELECT 
-                '202607' as periodo_auditoria,
-                c.afp_nombre,
-                COALESCE(p.num_planilla, 'POR DECLARAR') as planilla_vigente,
-                COALESCE(TO_CHAR(p.fecha_declaracion, 'DD/MM/YYYY'), 'Sin fecha') as fecha_formateada,
-                COALESCE(p.total_deuda_afp, 0.00) as total_afp,
-                COALESCE(p.nominal_fondo, 0.00) as fondo,
-                COALESCE(p.nominal_ryr, 0.00) as ryr,
-                COALESCE(p.num_trabajadores, 0) as trabajadores,
-                CASE 
-                    WHEN p.num_planilla IS NOT NULL AND t.num_ticket IS NULL THEN 'Planilla Declarada'
-                    WHEN p.num_planilla IS NULL THEN 'Pendiente de Declarar'
-                    ELSE COALESCE(t.estado_pago, 'Planilla Declarada')
-                END as estado_calculado,
-                COALESCE(t.num_ticket, 'Sin Ticket Emitido') as ticket_vigente,
-                COALESCE(TO_CHAR(t.fecha_expiracion, 'DD/MM/YYYY'), 'S/V') as vencimiento_ticket,
-                COALESCE(t.fecha_pago_real_str, 'Sin Pago') as fecha_pago_real, 
-                GREATEST(0, (
-                    SELECT COUNT(*) FROM public.empresa_trabajadores_maestro m 
-                    WHERE m.ruc = c.ruc AND m.activo_planilla = true AND m.afp_afiliado = c.afp_nombre
-                ) - COALESCE(p.num_trabajadores, 0)) as trabajadores_omitidos,
-                COALESCE((SELECT a.url_storage FROM public.afp_adjuntos a 
-                          WHERE a.ruc = c.ruc AND a.identificador_ref = p.num_planilla AND a.tipo_documento = 'PDF_PLANILLA' LIMIT 1), '') as url_planilla_pdf,
-                COALESCE((SELECT a.url_storage FROM public.afp_adjuntos a 
-                          WHERE a.ruc = c.ruc AND a.identificador_ref = t.num_ticket AND a.tipo_documento = 'PDF_TICKET' LIMIT 1), '') as url_ticket_pdf
-            FROM public.afp_config_empresa c
-            LEFT JOIN public.afp_planillas p ON c.ruc = p.ruc AND p.periodo = '202607' AND c.afp_nombre = p.afp_nombre
-            LEFT JOIN public.afp_tickets t ON p.ruc = t.ruc AND p.num_planilla = t.num_planilla AND t.vigente = true AND p.afp_nombre = t.afp_nombre
-            WHERE c.ruc = ? AND c.espera_declaracion = true
-            ORDER BY c.afp_nombre ASC
-        """.trimIndent()
+        SELECT
+            periodo_auditoria,
+            afp_nombre,
+            planilla_vigente,
+            fecha_formateada,
+            total_afp,
+            fondo,
+            ryr,
+            trabajadores,
+            ticket_vigente,
+            vencimiento_ticket,
+            fecha_pago_real,
+            estado_pago_ticket,
+            trabajadores_omitidos,
+            color_semaforo,
+            estado_cumplimiento,
+            url_planilla_pdf,
+            url_ticket_pdf
+        FROM public.v_dashboard_afp_planillas
+        WHERE ruc = ?
+    """.trimIndent()
 
         var conexion: Connection? = null
         try {
@@ -402,23 +393,33 @@ object PostgresDriver {
                         val afpNombre = rs.getString("afp_nombre") ?: "AFP"
                         val planillaNum = rs.getString("planilla_vigente") ?: "POR DECLARAR"
 
-                        // 🎯 MAPEO DIRECTO AL MODELO REFACTORIZADO DE ANDROID
+                        // Estado visible del ticket: si la planilla ya está declarada usamos
+                        // el estado_cumplimiento de la vista salvo que el ticket ya esté pagado
+                        val estadoPagoTicket = rs.getString("estado_pago_ticket") ?: "Pendiente"
+                        val estadoTicketMostrado = if (estadoPagoTicket.contains("Pagad", ignoreCase = true)) {
+                            estadoPagoTicket
+                        } else {
+                            rs.getString("estado_cumplimiento") ?: "Pendiente de Declarar"
+                        }
+
                         listaTemporal.add(
                             PlanillaAfpEntidad(
-                                periodo = rs.getString("periodo_auditoria") ?: "202607",
+                                periodo = rs.getString("periodo_auditoria") ?: "",
                                 planilla = "$afpNombre ($planillaNum)",
                                 fecha = rs.getString("fecha_formateada") ?: "Sin fecha",
                                 total = String.format("%.2f", rs.getDouble("total_afp")),
                                 fondo = String.format("%.2f", rs.getDouble("fondo")),
                                 ryr = String.format("%.2f", rs.getDouble("ryr")),
                                 trabajadores = rs.getInt("trabajadores").toString(),
-                                estadoTicket = rs.getString("estado_calculado") ?: "Pendiente de Declarar",
+                                estadoTicket = estadoTicketMostrado,
                                 omitidos = rs.getInt("trabajadores_omitidos").toString(),
                                 ticket = rs.getString("ticket_vigente") ?: "Sin Ticket",
                                 vencimiento = rs.getString("vencimiento_ticket") ?: "S/V",
-                                fechaPago = rs.getString("fecha_pago_real") ?: "Sin Pago",
+                                fechaPago = rs.getString("fecha_pago_real") ?: "Sin pago",
                                 urlPdf = rs.getString("url_planilla_pdf") ?: "",
-                                urlPdfTicket = rs.getString("url_ticket_pdf") ?: ""
+                                urlPdfTicket = rs.getString("url_ticket_pdf") ?: "",
+                                colorSemaforo = rs.getString("color_semaforo") ?: "GRIS",
+                                estadoCumplimiento = rs.getString("estado_cumplimiento") ?: "Pendiente"
                             )
                         )
                     }
