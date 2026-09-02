@@ -1,0 +1,66 @@
+<table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila1_2610626093" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610626093
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                05/08/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                19/08/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6543993875
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('avEEKZ0Vg6AMSeMrmpKv','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
