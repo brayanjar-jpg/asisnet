@@ -1,0 +1,436 @@
+package com.example.asisnet_contable
+
+import android.util.Log
+import java.sql.Connection
+import java.sql.DriverManager
+import java.util.Properties
+import java.util.HashMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+object PostgresDriver {
+    // 1. URL DE CONEXIÓN BASADA EN TU CONFIGURACIÓN
+    private const val URL = "jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
+    private const val USER = "postgres.atryivflkhjsynrqzora"
+    private const val PASSWORD = "Angelo2862*12"
+
+    init {
+        try {
+            Class.forName("org.postgresql.Driver")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun getConnection(): Connection = withContext(Dispatchers.IO) {
+        val props = Properties()
+        props.setProperty("user", USER)
+        props.setProperty("password", PASSWORD)
+        props.setProperty("ssl", "true")
+        props.setProperty("sslmode", "require")
+        props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory")
+        DriverManager.getConnection(URL, props)
+    }
+
+    // --- EVOLUCIONADO: EXTRAE LOS 9 PARÁMETROS DEL BUZÓN CON COPILACIÓN DE CONEXIÓN SEGURA ---
+    suspend fun obtenerBuzonPorCliente(rucInput: String): List<NotificacionSunat> = withContext(Dispatchers.IO) {
+        val listaTemporal = mutableListOf<NotificacionSunat>()
+
+        val query = """
+            SELECT 
+                n.asunto, 
+                n.fecha_hora, 
+                n.estado, 
+                n.num_resolucion, 
+                n.etiqueta, 
+                n.leido_app, 
+                COALESCE(d.cuerpo_completo, 'Este mensaje no contiene un cuerpo de texto extraído.') as cuerpo_completo,
+                (SELECT a.url_storage FROM public.notificaciones_adjuntos a 
+                 WHERE a.ruc = n.ruc AND a.num_resolucion = n.num_resolucion AND a.origen = 'ADJUNTO' LIMIT 1) as url_cabecera,
+                (SELECT a.url_storage FROM public.notificaciones_adjuntos a 
+                 WHERE a.ruc = n.ruc AND a.num_resolucion = n.num_resolucion AND a.origen = 'CUERPO' LIMIT 1) as url_cuerpo
+            FROM public.notificaciones_sunat n
+            LEFT JOIN public.notificaciones_detalles d ON n.ruc = d.ruc AND n.num_resolucion = d.num_resolucion
+            WHERE n.ruc = ? 
+            ORDER BY n.fecha_hora DESC
+        """.trimIndent()
+
+        var conexion: Connection? = null
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, rucInput.trim())
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        val timestampRaw = rs.getTimestamp("fecha_hora")
+                        val fechaFormateada = timestampRaw?.toString() ?: "Sin Fecha"
+
+                        listaTemporal.add(
+                            NotificacionSunat(
+                                asunto = rs.getString("asunto") ?: "Sin Asunto",
+                                fechaHora = fechaFormateada,
+                                estado = rs.getString("estado") ?: "REVISADO",
+                                numResolucion = rs.getString("num_resolucion") ?: "S/N",
+                                etiqueta = rs.getString("etiqueta") ?: "",
+                                leidoApp = rs.getBoolean("leido_app"),
+                                // 🎯 CORREGIDO: Blindaje elvis contra nulos para evitar NullPointerException en Android
+                                contenidoCuerpo = rs.getString("cuerpo_completo") ?: "Este mensaje no contiene un cuerpo de texto extraído.",
+                                urlPdfCabecera = rs.getString("url_cabecera") ?: "",
+                                urlPdfCuerpo = rs.getString("url_cuerpo") ?: ""
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext listaTemporal
+    }
+    suspend fun cambiarEstadoLeidoApp(rucInput: String, numResolucionInput: String, nuevoEstado: Boolean): Boolean = withContext(Dispatchers.IO) {
+        val query = """
+            UPDATE public.notificaciones_sunat 
+            SET leido_app = ? 
+            WHERE ruc = ? AND num_resolucion = ?
+        """.trimIndent()
+
+        var conexion: Connection? = null
+        var exito = false // 🎯 CORREGIDO: Variable de retorno local para evitar que el 'return' rompa el flujo del finally
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setBoolean(1, nuevoEstado)
+                stmt.setString(2, rucInput.trim())
+                stmt.setString(3, numResolucionInput.trim())
+                exito = stmt.executeUpdate() > 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext exito
+    }
+
+    // =====================================================================
+    // --- GESTIÓN DE ACCESOS Y MANTENIMIENTO MULTICLIENTE ---
+    // =====================================================================
+    suspend fun validarLogin(usuarioInput: String, claveInput: String): Pair<String, Boolean>? = withContext(Dispatchers.IO) {
+        val query = "SELECT activo FROM empresas WHERE ruc = ? AND clave_sol = ?"
+        var conexion: Connection? = null
+        var resultado: Pair<String, Boolean>? = null // 🎯 CORREGIDO: Retorno seguro libre de hilos huérfanos
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, usuarioInput.trim())
+                stmt.setString(2, claveInput.trim())
+                stmt.executeQuery().use { rs ->
+                    if (rs.next()) {
+                        val activo = rs.getBoolean("activo")
+                        resultado = Pair("CLIENTE", activo)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext resultado
+    }
+
+    suspend fun registrarNuevoCliente(ruc: String, razonSocial: String, usuarioSol: String, claveSol: String): Boolean = withContext(Dispatchers.IO) {
+        val query = """
+            INSERT INTO empresas (ruc, nombre, usuario_sol, clave_sol, activo) 
+            VALUES (?, ?, ?, ?, true)
+        """.trimIndent()
+        var conexion: Connection? = null
+        var exito = false
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, ruc.trim())
+                stmt.setString(2, razonSocial.trim())
+                stmt.setString(3, usuarioSol.trim())
+                stmt.setString(4, claveSol.trim())
+                exito = stmt.executeUpdate() > 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext exito
+    }
+
+    suspend fun obtenerTodosLosClientes(): List<ClienteEntidad> = withContext(Dispatchers.IO) {
+        val listaTemporal = mutableListOf<ClienteEntidad>()
+        val query = "SELECT ruc, nombre FROM empresas ORDER BY nombre ASC"
+        var conexion: Connection? = null
+        try {
+            conexion = getConnection()
+            conexion.createStatement().use { statement ->
+                statement.executeQuery(query).use { resultSet ->
+                    while (resultSet.next()) {
+                        val ruc = resultSet.getString("ruc") ?: ""
+                        val nombre = resultSet.getString("nombre") ?: "Sin Nombre"
+                        listaTemporal.add(ClienteEntidad(ruc, nombre))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext listaTemporal
+    }
+
+    suspend fun obtenerDetallesCliente(rucInput: String): DatosDetalleCliente? = withContext(Dispatchers.IO) {
+        val query = "SELECT ruc, nombre, usuario_sol, clave_sol, activo FROM empresas WHERE ruc = ?"
+        var conexion: Connection? = null
+        var detalle: DatosDetalleCliente? = null
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, rucInput.trim())
+                stmt.executeQuery().use { rs ->
+                    if (rs.next()) {
+                        detalle = DatosDetalleCliente(
+                            ruc = rs.getString("ruc") ?: "",
+                            nombre = rs.getString("nombre") ?: "",
+                            usuarioSol = rs.getString("usuario_sol") ?: "",
+                            claveSol = rs.getString("clave_sol") ?: "",
+                            activo = rs.getBoolean("activo")
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext detalle
+    }
+    suspend fun actualizarEstadoCliente(rucInput: String, nuevoEstado: Boolean): Boolean = withContext(Dispatchers.IO) {
+        val query = "UPDATE empresas SET activo = ? WHERE ruc = ?"
+        var conexion: Connection? = null
+        var exito = false
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setBoolean(1, nuevoEstado)
+                stmt.setString(2, rucInput.trim())
+                exito = stmt.executeUpdate() > 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext exito
+    }
+
+    // =====================================================================
+    // --- CONSULTA DE DECLARACIONES JURADAS (HISTORIAL ANTERIOR) ---
+    // =====================================================================
+    suspend fun obtenerDeclaracionesPorCliente(rucInput: String): List<Map<String, String>> = withContext(Dispatchers.IO) {
+        val listaTemporal = mutableListOf<Map<String, String>>()
+
+        val query = """
+            SELECT 
+                d.num_formulario,
+                d.des_formulario,
+                d.num_orden,
+                d.periodo,
+                TO_CHAR(d.fecha_presentacion, 'DD/MM/YYYY') as fecha_formateada,
+                COALESCE(d.total_pagado, 0.00) as total_pagado,
+                COALESCE(d.tipo_declaracion, 'Original') as tipo_declaracion,
+                COALESCE((SELECT a.url_storage FROM public.declaraciones_adjuntos a 
+                          WHERE a.ruc = d.ruc AND a.num_orden = d.num_orden AND a.nombre_archivo LIKE 'constancia_%' LIMIT 1), '') as url_constancia,
+                COALESCE((SELECT a.url_storage FROM public.declaraciones_adjuntos a 
+                          WHERE a.ruc = d.ruc AND a.num_orden = d.num_orden AND a.nombre_archivo LIKE 'detalle_%' LIMIT 1), '') as url_detalle
+            FROM public.declaraciones_sunat d
+            WHERE d.ruc = ?
+            ORDER BY d.fecha_presentacion DESC
+        """.trimIndent()
+
+        var conexion: Connection? = null
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, rucInput.trim())
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        val registro = HashMap<String, String>()
+
+                        registro.put("formulario", rs.getString("num_formulario") ?: "0621")
+                        registro.put("descripcion", rs.getString("des_formulario") ?: "DECLARACIÓN JURADA")
+                        registro.put("orden", rs.getString("num_orden") ?: "S/N")
+                        registro.put("periodo", rs.getString("periodo") ?: "")
+                        registro.put("fecha", rs.getString("fecha_formateada") ?: "")
+                        registro.put("total", String.format("%.2f", rs.getDouble("total_pagado")))
+                        registro.put("tipoDeclaracion", rs.getString("tipo_declaracion") ?: "Original")
+                        registro.put("urlPdf", rs.getString("url_constancia") ?: "")
+                        registro.put("urlPdfDetalle", rs.getString("url_detalle") ?: "")
+
+                        listaTemporal.add(registro)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext listaTemporal
+    }
+
+    // =====================================================================
+    // 🚀 FUNCIÓN ESTRELLA REFACTORIZADA: ORDEN CRONOLÓGICO STRICTO DESCENDENTE
+    // =====================================================================
+    suspend fun obtenerDashboardPredictivoDDJJ(rucInput: String): List<ObligacionSunat> = withContext(Dispatchers.IO) {
+        val listaPredictiva = mutableListOf<ObligacionSunat>()
+
+        // 🎯 CORREGIDO: Se cambia el ordenamiento al final del Query para mandar el periodo más nuevo arriba
+        val query = """
+            SELECT 
+                v.ruc,
+                v.pdt_codigo,
+                v.pdt_nombre,
+                v.periodo,
+                TO_CHAR(v.fecha_vencimiento, 'YYYY-MM-DD') as venc_formateado,
+                v.num_orden,
+                TO_CHAR(v.fecha_presentacion, 'DD/MM/YYYY') as presenta_formateada,
+                v.total_pagado,
+                v.color_semaforo,
+                v.estado_cumplimiento as estado_descripcion, -- Cruza con la columna de tu vista original
+                v.orden_prioridad,
+                v.url_pdf_constancia,
+                v.url_pdf_detalle
+            FROM public.v_control_preventivo_ddjj v -- 🚀 ACTUALIZADO: Apunta a tu vista real unificada
+            WHERE v.ruc = ?
+            ORDER BY v.periodo DESC
+        """.trimIndent()
+
+
+        var conexion: Connection? = null
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, rucInput.trim())
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        listaPredictiva.add(
+                            ObligacionSunat(
+                                ruc = rs.getString("ruc") ?: "",
+                                pdtCodigo = rs.getString("pdt_codigo") ?: "0621",
+                                pdtNombre = rs.getString("pdt_nombre") ?: "DECLARACIÓN JURADA",
+                                periodo = rs.getString("periodo") ?: "",
+                                fechaVencimiento = rs.getString("venc_formateado") ?: "",
+                                numOrden = rs.getString("num_orden"),
+                                fechaPresentacion = rs.getString("presenta_formateado"),
+                                totalPagado = rs.getDouble("total_pagado"),
+                                colorSemaforo = rs.getString("color_semaforo") ?: "GRIS",
+                                estadoDescripcion = rs.getString("estado_descripcion") ?: "Pendiente",
+                                ordenPrioridad = rs.getInt("orden_prioridad"),
+                                urlPdfConstancia = rs.getString("url_constancia") ?: "",
+                                urlPdfDetallePdt = rs.getString("url_detalle") ?: ""
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext listaPredictiva
+    }
+
+    // =====================================================================
+    // --- GESTIÓN DE CONTROL MULTI-AFP CON DESGLOSE NOMINAL Y PAGO REAL ---
+    // =====================================================================
+    // 🚀 CORREGIDO: Firma fuertemente tipada con el modelo estructural PlanillaAfpEntidad
+    suspend fun obtenerPlanillasAfpPorCliente(rucInput: String): List<PlanillaAfpEntidad> = withContext(Dispatchers.IO) {
+        val listaTemporal = mutableListOf<PlanillaAfpEntidad>()
+
+        val query = """
+            SELECT 
+                '202607' as periodo_auditoria,
+                c.afp_nombre,
+                COALESCE(p.num_planilla, 'POR DECLARAR') as planilla_vigente,
+                COALESCE(TO_CHAR(p.fecha_declaracion, 'DD/MM/YYYY'), 'Sin fecha') as fecha_formateada,
+                COALESCE(p.total_deuda_afp, 0.00) as total_afp,
+                COALESCE(p.nominal_fondo, 0.00) as fondo,
+                COALESCE(p.nominal_ryr, 0.00) as ryr,
+                COALESCE(p.num_trabajadores, 0) as trabajadores,
+                CASE 
+                    WHEN p.num_planilla IS NOT NULL AND t.num_ticket IS NULL THEN 'Planilla Declarada'
+                    WHEN p.num_planilla IS NULL THEN 'Pendiente de Declarar'
+                    ELSE COALESCE(t.estado_pago, 'Planilla Declarada')
+                END as estado_calculado,
+                COALESCE(t.num_ticket, 'Sin Ticket Emitido') as ticket_vigente,
+                COALESCE(TO_CHAR(t.fecha_expiracion, 'DD/MM/YYYY'), 'S/V') as vencimiento_ticket,
+                COALESCE(t.fecha_pago_real_str, 'Sin Pago') as fecha_pago_real, 
+                GREATEST(0, (
+                    SELECT COUNT(*) FROM public.empresa_trabajadores_maestro m 
+                    WHERE m.ruc = c.ruc AND m.activo_planilla = true AND m.afp_afiliado = c.afp_nombre
+                ) - COALESCE(p.num_trabajadores, 0)) as trabajadores_omitidos,
+                COALESCE((SELECT a.url_storage FROM public.afp_adjuntos a 
+                          WHERE a.ruc = c.ruc AND a.identificador_ref = p.num_planilla AND a.tipo_documento = 'PDF_PLANILLA' LIMIT 1), '') as url_planilla_pdf,
+                COALESCE((SELECT a.url_storage FROM public.afp_adjuntos a 
+                          WHERE a.ruc = c.ruc AND a.identificador_ref = t.num_ticket AND a.tipo_documento = 'PDF_TICKET' LIMIT 1), '') as url_ticket_pdf
+            FROM public.afp_config_empresa c
+            LEFT JOIN public.afp_planillas p ON c.ruc = p.ruc AND p.periodo = '202607' AND c.afp_nombre = p.afp_nombre
+            LEFT JOIN public.afp_tickets t ON p.ruc = t.ruc AND p.num_planilla = t.num_planilla AND t.vigente = true AND p.afp_nombre = t.afp_nombre
+            WHERE c.ruc = ? AND c.espera_declaracion = true
+            ORDER BY c.afp_nombre ASC
+        """.trimIndent()
+
+        var conexion: Connection? = null
+        try {
+            conexion = getConnection()
+            conexion.prepareStatement(query).use { stmt ->
+                stmt.setString(1, rucInput.trim())
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        val afpNombre = rs.getString("afp_nombre") ?: "AFP"
+                        val planillaNum = rs.getString("planilla_vigente") ?: "POR DECLARAR"
+
+                        // 🎯 MAPEO DIRECTO AL MODELO REFACTORIZADO DE ANDROID
+                        listaTemporal.add(
+                            PlanillaAfpEntidad(
+                                periodo = rs.getString("periodo_auditoria") ?: "202607",
+                                planilla = "$afpNombre ($planillaNum)",
+                                fecha = rs.getString("fecha_formateada") ?: "Sin fecha",
+                                total = String.format("%.2f", rs.getDouble("total_afp")),
+                                fondo = String.format("%.2f", rs.getDouble("fondo")),
+                                ryr = String.format("%.2f", rs.getDouble("ryr")),
+                                trabajadores = rs.getInt("trabajadores").toString(),
+                                estadoTicket = rs.getString("estado_calculado") ?: "Pendiente de Declarar",
+                                omitidos = rs.getInt("trabajadores_omitidos").toString(),
+                                ticket = rs.getString("ticket_vigente") ?: "Sin Ticket",
+                                vencimiento = rs.getString("vencimiento_ticket") ?: "S/V",
+                                fechaPago = rs.getString("fecha_pago_real") ?: "Sin Pago",
+                                urlPdf = rs.getString("url_planilla_pdf") ?: "",
+                                urlPdfTicket = rs.getString("url_ticket_pdf") ?: ""
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { conexion?.close() } catch (e: Exception) { e.printStackTrace() }
+        }
+        return@withContext listaTemporal
+    }
+
+}
+
