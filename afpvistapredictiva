@@ -1,0 +1,77 @@
+-- public.v_control_preventivo_afp source
+
+CREATE OR REPLACE VIEW public.v_control_preventivo_afp
+AS WITH meses_inteligentes AS (
+         SELECT to_char(m.m, 'YYYYMM'::text)::character varying(6) AS periodo
+           FROM generate_series('2026-01-01'::date::timestamp with time zone, ((CURRENT_DATE AT TIME ZONE 'America/Lima'::text) - '1 mon'::interval)::date::timestamp with time zone, '1 mon'::interval) m(m)
+        ), planillas_vencimiento AS (
+         SELECT mi.periodo,
+            emp.ruc,
+            emp.id AS empresa_id,
+            cfg.afp_nombre,
+            (( SELECT d.d
+                   FROM generate_series(to_date(mi.periodo::text, 'YYYYMM'::text) + '1 mon'::interval, to_date(mi.periodo::text, 'YYYYMM'::text) + '1 mon'::interval + '20 days'::interval, '1 day'::interval) d(d)
+                  WHERE EXTRACT(isodow FROM d.d) < 6::numeric AND NOT (EXISTS ( SELECT 1
+                           FROM feriados_peru f
+                          WHERE f.fecha = d.d::date))
+                 OFFSET 4
+                 LIMIT 1))::date AS fecha_vencimiento
+           FROM empresas emp
+             JOIN afp_config_empresa cfg ON emp.ruc::text = cfg.ruc::text AND cfg.espera_declaracion = true
+             CROSS JOIN meses_inteligentes mi
+        ), tickets_resumen AS (
+         SELECT afp_tickets.ruc,
+            afp_tickets.num_planilla,
+            string_agg(afp_tickets.num_ticket::text, ', '::text) AS tickets,
+            max(afp_tickets.fecha_pago_real) AS ultima_fecha_pago,
+            sum(COALESCE(afp_tickets.monto_ticket, 0.00)) AS total_pagado_tickets
+           FROM afp_tickets
+          WHERE afp_tickets.vigente = true
+          GROUP BY afp_tickets.ruc, afp_tickets.num_planilla
+        )
+ SELECT pv.ruc,
+    pv.empresa_id,
+    pv.afp_nombre,
+    pv.periodo,
+    pv.fecha_vencimiento,
+    plan.num_planilla AS num_declaracion,
+    t_res.tickets AS num_tickets_pago,
+    plan.fecha_declaracion AS fecha_presentacion,
+    COALESCE(t_res.total_pagado_tickets, plan.total_deuda_afp, 0.00)::numeric(12,2) AS total_pagado,
+    COALESCE(( SELECT count(*) AS count
+           FROM afp_adjuntos adj
+          WHERE adj.ruc::text = pv.ruc::text AND (adj.identificador_ref::text = plan.num_planilla::text OR (adj.identificador_ref::text IN ( SELECT unnest(string_to_array(t_res.tickets, ', '::text)) AS unnest)))), 0::bigint) AS cantidad_adjuntos,
+        CASE
+            WHEN plan.num_planilla IS NOT NULL THEN 'VERDE'::text
+            WHEN pv.fecha_vencimiento < (CURRENT_DATE AT TIME ZONE 'America/Lima'::text)::date THEN 'ROJO'::text
+            WHEN (pv.fecha_vencimiento - (CURRENT_DATE AT TIME ZONE 'America/Lima'::text)::date) <= 2 THEN 'NARANJA'::text
+            ELSE 'GRIS'::text
+        END AS color_semaforo,
+        CASE
+            WHEN plan.num_planilla IS NOT NULL THEN '✅ PRESENTADO'::text
+            WHEN pv.fecha_vencimiento < (CURRENT_DATE AT TIME ZONE 'America/Lima'::text)::date THEN '🚨 OMISO - RIESGO GASTOS JUDICIALES'::text
+            ELSE '⌛ PENDIENTE (A TIEMPO)'::text
+        END AS estado_cumplimiento,
+        CASE
+            WHEN plan.num_planilla IS NULL AND pv.fecha_vencimiento < (CURRENT_DATE AT TIME ZONE 'America/Lima'::text)::date THEN 'Alerta: Deuda Presunta / Intereses Moratorios Ley 25897'::text
+            WHEN plan.fecha_declaracion::date > pv.fecha_vencimiento THEN 'Presentación Extemporánea'::text
+            ELSE 'Situación Regular'::text
+        END AS alerta_auditor,
+        CASE
+            WHEN plan.num_planilla IS NOT NULL THEN 4
+            WHEN pv.fecha_vencimiento < (CURRENT_DATE AT TIME ZONE 'America/Lima'::text)::date THEN 1
+            WHEN (pv.fecha_vencimiento - (CURRENT_DATE AT TIME ZONE 'America/Lima'::text)::date) <= 2 THEN 2
+            ELSE 3
+        END AS orden_prioridad,
+    COALESCE(( SELECT a.url_storage
+           FROM afp_adjuntos a
+          WHERE a.ruc::text = pv.ruc::text AND a.identificador_ref::text = plan.num_planilla::text AND a.nombre_archivo::text ~~ 'constancia_%'::text
+         LIMIT 1), ''::text) AS url_pdf_constancia,
+    COALESCE(( SELECT a.url_storage
+           FROM afp_adjuntos a
+          WHERE a.ruc::text = pv.ruc::text AND a.identificador_ref::text = plan.num_planilla::text AND a.nombre_archivo::text ~~ 'detalle_%'::text
+         LIMIT 1), ''::text) AS url_pdf_detalle
+   FROM planillas_vencimiento pv
+     LEFT JOIN afp_planillas plan ON pv.ruc::text = plan.ruc::text AND pv.periodo::text = plan.periodo::text
+     LEFT JOIN tickets_resumen t_res ON pv.ruc::text = t_res.ruc::text AND plan.num_planilla::text = t_res.num_planilla::text
+  ORDER BY pv.periodo DESC, pv.ruc;
