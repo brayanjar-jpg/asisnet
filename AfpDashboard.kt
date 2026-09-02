@@ -37,9 +37,10 @@ data class PlanillaAfpEntidad(
     val vencimiento: String,
     val fechaPago: String,
     val urlPdf: String,
-    val urlPdfTicket: String
+    val urlPdfTicket: String,
+    val colorSemaforo: String,        // NUEVO
+    val estadoCumplimiento: String    // NUEVO
 )
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AfpDashboard(
