@@ -1,0 +1,394 @@
+import asyncio
+import os
+import re
+from datetime import datetime
+from playwright.async_api import async_playwright
+from supabase import create_client, Client
+
+# =====================================================================
+# 🗄️ CONFIGURACIÓN DE CREDENCIALES DE BASE DE DATOS (SUPABASE)
+# =====================================================================
+SUPABASE_URL = "https://atryivflkhjsynrqzora.supabase.co"
+SUPABASE_KEY = "sb_publishable_ivz6H-WHRkaeQs7k8HOd_Q_k5xzhzbm" # Asegúrate de que esté completa aquí
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+URL_LOGIN_DDJJ = "https://api-seguridad.sunat.gob.pe/v1/clientessol/59d39217-c025-4de5-b342-393b0f4630ab/oauth2/loginMenuSol?lang=es-PE&showDni=true&showLanguages=false&originalUrl=https://e-menu.sunat.gob.pe/cl-ti-itmenu2/AutenticaMenuInternetPlataforma.htm&state=rO0ABXQA7HpIam90dXJFVVlqQlpNb2t3NE8xQUZiZFBYdG5qZlhKbzVRQ3k0TnBZZ0lWNWhBNDU4OTZWU2xUbU85V1pVa2gvQUU2N09OR1VPR0M2d2g1YTBmMkxlOGpZQWNiazcyVXkweEhkTU44QWQrNVJCYUJURkgvcHdPRkxGZkplSTN5dkFESjdBSXZXM2lZbkZOc2NwMWNsbWJ2c1pXeUJQVnNIOEdERklJZWFCd1AvRFFVTFcraGRoeGk0YTczVC9pS3Z0Vmd1WVBqODlJckN3LzViaE5LelBmcnNqcURTNHdNOVYvTitvYTVyVmM9"
+
+# Mapa contable para normalizar los periodos extraídos del DOM a formato YYYYMM
+MAPA_MESES_SUNAT = {
+    "ENERO": "01", "FEBRERO": "02", "MARZO": "03", "ABRIL": "04",
+    "MAYO": "05", "JUNIO": "06", "JULIO": "07", "AGOSTO": "08",
+    "SETIEMBRE": "09", "OCTUBRE": "10", "NOVIEMBRE": "11", "DICIEMBRE": "12"
+}
+
+async def procesar_ddjj_empresa(browser, ruc, usuario, clave, nombre_empresa):
+    print(f"\n{'='*70}\n[BOT-DDJJ] PROCESANDO EMPRESA EN FLUJO CONTINUO: {nombre_empresa} (RUC: {ruc})\n{'='*70}")
+    
+    # --- 🛡️ CONTROL DE DUPLICADOS HISTÓRICO REMOTO ---
+    print("[BOT-DDJJ] Cargando catálogo de órdenes registradas en Supabase...")
+    loop = asyncio.get_event_loop()
+    try:
+        query_cache = await loop.run_in_executor(
+            None,
+            lambda: supabase.table("declaraciones_sunat")
+                .select("num_orden")
+                .eq("ruc", ruc)
+                .execute()
+        )
+        ordenes_guardadas = {row["num_orden"] for row in query_cache.data}
+        print(f"[BOT-DDJJ] Se cargaron {len(ordenes_guardadas)} órdenes desde el historial remoto.")
+    except Exception as e_cache:
+        print(f"[AVISO] No se pudo armar el catálogo de control: {str(e_cache)}")
+        ordenes_guardadas = set()
+
+    # Creación de contexto aislado por cliente para evitar colisión de cookies JWT
+    context = await browser.new_context(viewport={"width": 1280, "height": 800}, accept_downloads=True)
+    page = await context.new_page()
+    control_sesion = {"token_jwt": None}
+
+    # --- 🔎 SNIFFER DE TRÁFICO DE RED EN VIVO ---
+    async def verificar_trafico_red(request):
+        if "idCache=" in request.url and control_sesion["token_jwt"] is None:
+            match = re.search(r"idCache=([^&]+)", request.url)
+            if match:
+                control_sesion["token_jwt"] = match.group(1)
+                print("   [SNIFFER] ¡idCache (Token JWT) detectado y clonado con éxito!")
+
+    page.on("request", verificar_trafico_red)
+    
+    try:
+        await page.goto(URL_LOGIN_DDJJ)
+        await page.wait_for_selector("#txtRuc")
+        
+        await page.fill("#txtRuc", ruc)
+        await page.fill("#txtUsuario", usuario)
+        await page.fill("#txtContrasena", clave)
+        
+        print("[BOT-DDJJ] Credenciales escritas. Autenticando...")
+        await page.click("#btnAceptar")
+        await asyncio.sleep(4)
+        if control_sesion["token_jwt"] is None and "idCache=" in page.url:
+            match_url = re.search(r"idCache=([^&]+)", page.url)
+            if match_url:
+                control_sesion["token_jwt"] = match_url.group(1)
+
+        token_obtenido = control_sesion["token_jwt"]
+        if not token_obtenido:
+            print("[❌ ERROR] No se pudo capturar el idCache de red. Abortando empresa.")
+            await context.close()
+            return
+
+        url_salto_plataforma = (
+            f"https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm"
+            f"?action=execute&code=55.2.1.1.1&idCache={token_obtenido}&s=ww1"
+        )
+        
+        print("[BOT-DDJJ] Saltando directamente al formulario por bypass de URL...")
+        await page.goto(url_salto_plataforma, wait_until="commit")
+        await asyncio.sleep(6)
+
+        # =====================================================================
+        # 🚀 CONTROL DE COMBOS DE PERIODO TRIBUTARIO FIJO EXCLUSIVO: MARZO 2026
+        # =====================================================================
+        print("[BOT-DDJJ] Configurando rango contable estricto: MARZO 2026 (03/2026)...")
+
+        select_mes_inicio = page.locator("#periodo_tributario_1")
+        await select_mes_inicio.wait_for(state="visible", timeout=6000)
+        await select_mes_inicio.select_option(value="03")
+
+        select_anio_inicio = page.locator("select[ng-model='consultaBean.rangoPeriodoTributarioInicioAnio']")
+        await select_anio_inicio.select_option(value="number:2026")
+
+        select_mes_fin = page.locator("#periodo_tributario_2")
+        await select_mes_fin.select_option(value="03")
+
+        select_anio_fin = page.locator("select[ng-model='consultaBean.rangoPeriodoTributarioFinAnio']")
+        await select_anio_fin.select_option(value="number:2026")
+
+        print("[BOT-DDJJ] Filtro de Marzo 2026 aplicado. Asegurando estabilidad del DOM...")
+        await asyncio.sleep(2)
+        
+        boton_buscar_real = page.locator("button[ng-click*='buscarConstancia'], button.btn-primary:has-text('Buscar'), button[tkey='consulta-boton-buscar']").first
+        
+        print("[BOT-DDJJ] Gatillando clic físico FORZADO en el botón Buscar...")
+        await boton_buscar_real.scroll_into_view_if_needed()
+        await boton_buscar_real.click(force=True)
+        
+        print("[BOT-DDJJ] Esperando el procesamiento asíncrono de la consulta de SUNAT...")
+        await asyncio.sleep(6)
+        # =====================================================================
+        # --- PARTE 3: MONITOREO DEL DOM Y EXTRACCIÓN ANALÍTICA DE FILAS ---
+        # =====================================================================
+        print("   [BOT-DDJJ] Monitoreando el DOM para detectar la tabla de resultados...")
+        await page.wait_for_load_state("domcontentloaded")
+        
+        selector_tabla_real = "table, .table, #tblDeclaraciones, #listaResultado table"
+        await page.wait_for_selector(selector_tabla_real, timeout=20000, state="visible")
+        
+        filas_declaraciones = page.locator("table tbody tr, .table tbody tr, #listaResultado table tbody tr")
+        cantidad_filas = await filas_declaraciones.count()
+            
+        print(f"   [BOT-DDJJ] ¡Tabla física detectada! Se identificaron {cantidad_filas} filas para procesar.")
+        
+        registros_maestro_ddjj = []
+        registros_adjuntos_ddjj = []
+        ordenes_procesadas_bucle = set()
+
+        for j in range(cantidad_filas):
+            try:
+                fila = filas_declaraciones.nth(j)
+                celdas = fila.locator("td")
+                cantidad_celdas = await celdas.count()
+                
+                if cantidad_celdas < 6:
+                    continue
+
+                # =====================================================================
+                # 📊 EXTRACCIÓN ANÁLITICA DE CELDAS CON AWAIT ASÍNCRONO BLINDADO
+                # =====================================================================
+                # 🚀 CORREGIDO: Se inyectó el 'await' obligatorio al inicio de num_formulario
+                periodo_raw = await celdas.nth(1).inner_text()
+                num_formulario = await celdas.nth(2).inner_text() 
+                des_formulario = await celdas.nth(3).inner_text()
+                num_orden = await celdas.nth(4).inner_text()
+                fecha_pres_raw = await celdas.nth(5).inner_text()
+                total_pagado_raw = await celdas.nth(7).inner_text()
+
+                num_orden = num_orden.strip()
+                num_formulario = num_formulario.strip() # 🎯 Ahora sí limpiará el string real ("0601", "0621")
+
+                
+                if not num_orden or not num_orden.isdigit():
+                    continue
+
+                # 🚀 🎯 CORTOCIRCUITO OMISOR DE BOLETAS VIRTUALES: Salta de inmediato sin abrir modales
+                if num_formulario == "1662":
+                    print(f"      [SKIP-FORM-1662] Fila {j+1}: Omitiendo Boleta de Pago Virtual en 0ms por casuística contable.")
+                    continue
+
+                if num_orden in ordenes_procesadas_bucle or num_orden in ordenes_guardadas:
+                    continue
+                ordenes_procesadas_bucle.add(num_orden)
+                
+                print(f"      [PROCESANDO] Fila {j+1}: Form: {num_formulario} | Período: {periodo_raw.strip()} | Orden: {num_orden}")
+
+                periodo_limpio = periodo_raw.strip().upper()
+                match_p = re.search(r"(\d{2})/(\d{4})", periodo_limpio)
+                if match_p:
+                    periodo_iso = f"{match_p.group(2)}{match_p.group(1)}"
+                else:
+                    match_texto = re.search(r"([A-Z]+)\s*-\s*(\d{4})", periodo_limpio)
+                    if match_texto:
+                        periodo_iso = f"{match_texto.group(2)}{MAPA_MESES_SUNAT.get(match_texto.group(1), '01')}"
+                    else:
+                        periodo_iso = "202601"
+
+                total_pagado = 0.00
+                if total_pagado_raw:
+                    total_pagado_limpio = re.sub(r"[^\d.]", "", total_pagado_raw.strip())
+                    if total_pagado_limpio:
+                        total_pagado = float(total_pagado_limpio)
+                
+                try:
+                    fecha_obj = datetime.strptime(fecha_pres_raw.strip(), "%d/%m/%Y %H:%M:%S")
+                    fecha_postgres = fecha_obj.strftime("%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    try:
+                        fecha_obj = datetime.strptime(fecha_pres_raw.strip(), "%d/%m/%Y")
+                        fecha_postgres = fecha_obj.strftime("%Y-%m-%d 00:00:00")
+                    except Exception:
+                        fecha_postgres = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                # =====================================================================
+                # 📄 ADJUNTO 1: CONSTANCIA DE PRESENTACIÓN (UNIVERSAL DETECT & DOWNLOAD)
+                # =====================================================================
+                enlace_modal = fila.locator("a[ng-click*='mostrarConstancia'], a:has(span.glyphicon-copy)").first
+                tipo_declaracion = "Original"
+                
+                if await enlace_modal.count() > 0:
+                    nombre_archivo_ddjj = f"constancia_{num_formulario}_{num_orden}.pdf"
+                    try:
+                        await enlace_modal.scroll_into_view_if_needed()
+                        print(f"         [MODAL] Abriendo ventana legítima de la constancia para Form {num_formulario}...")
+                        await enlace_modal.click(force=True, timeout=5000)
+                        
+                        contenedor_modal = page.locator("div.modal-content, div[role='dialog']").first
+                        await contenedor_modal.wait_for(state="visible", timeout=6000)
+                        
+                        if num_formulario == "0601":
+                            ruta_foto_modal = f"D:/Buzon_SUNAT_Clientes/Evidencia_DDJJ/modal_0601_{num_orden}.png"
+                            os.makedirs("D:/Buzon_SUNAT_Clientes/Evidencia_DDJJ", exist_ok=True)
+                            await contenedor_modal.screenshot(path=ruta_foto_modal)
+
+                        try:
+                            texto_modal_raw = await contenedor_modal.inner_text()
+                            match_tipo = re.search(r"Tipo de Declaración:\s*(Original|Sustitutoria|Rectificatoria)", texto_modal_raw, re.IGNORECASE)
+                            
+                            if match_tipo:
+                                tipo_declaracion = match_tipo.group(1).strip().capitalize()
+                                print(f"         [ANÁLISIS-HTML] Tipo detectado con éxito: {tipo_declaracion}")
+                            else:
+                                if "Sustitutoria" in texto_modal_raw:
+                                    tipo_declaracion = "Sustitutoria"
+                                elif "Rectificatoria" in texto_modal_raw:
+                                    tipo_declaracion = "Rectificatoria"
+                                else:
+                                    tipo_declaracion = "Original"
+                        except Exception:
+                            pass
+
+                        try:
+                            selector_guardar_pdf = "button:has-text('Guardar'), button[ng-click*='exportarConstancia'], button[tkey='constancia-boton-guardar']"
+                            boton_descarga_clic = page.locator(selector_guardar_pdf).first
+                            await boton_descarga_clic.wait_for(state="visible", timeout=5000)
+
+                            async with page.expect_download(timeout=10000) as download_info_ddjj: 
+                                await boton_descarga_clic.click(force=True)
+                            
+                            os.makedirs("D:/Buzon_SUNAT_Clientes/Temp_DDJJ", exist_ok=True)
+                            ruta_local_ddjj = f"D:/Buzon_SUNAT_Clientes/Temp_DDJJ/{nombre_archivo_ddjj}"
+                            await (await download_info_ddjj.value).save_as(ruta_local_ddjj)
+                            
+                            ruta_storage_ddjj = f"{ruc}/ddjj_{num_orden}_{nombre_archivo_ddjj}"
+                            with open(ruta_local_ddjj, "rb") as f_bin_ddjj:
+                                await loop.run_in_executor(None, lambda: supabase.storage.from_("adjuntos-sunat").upload(
+                                    file=f_bin_ddjj, path=ruta_storage_ddjj,
+                                    file_options={"content-type": "application/pdf", "x-upsert": "true"}
+                                ))
+                            
+                            url_publica_ddjj = supabase.storage.from_("adjuntos-sunat").get_public_url(ruta_storage_ddjj)
+                            registros_adjuntos_ddjj.append({
+                                "ruc": ruc, "num_orden": num_orden, "nombre_archivo": nombre_archivo_ddjj, "url_storage": url_publica_ddjj
+                            })
+                            print(f"         [STORAGE] ¡PDF Constancia guardado en la nube!")
+                        except Exception as e_down:
+                            print(f"         [ALERTA RED] Omitiendo PDF por latencia de descarga: {str(e_down)}. Se conserva metadata real.")
+
+                        boton_cerrar_modal = page.locator("button:has-text('Cerrar'), button[data-dismiss='modal'], .modal-header .close").first
+                        if await boton_cerrar_modal.count() > 0:
+                            await boton_cerrar_modal.click(force=True)
+                        
+                        await page.keyboard.press("Escape")
+                        await asyncio.sleep(1)
+                        if 'ruta_local_ddjj' in locals() and os.path.exists(ruta_local_ddjj):
+                            os.remove(ruta_local_ddjj)
+                            
+                    except Exception as e_m:
+                        await page.keyboard.press("Escape")
+                        await asyncio.sleep(1)
+                # =====================================================================
+                # 📊 ADJUNTO 2: REPORTE DETALLADO (💡 CASUÍSTICA EXCLUSIVA 0621)
+                # =====================================================================
+                if num_formulario == "0621":
+                    enlace_detalle_modal = fila.locator("a:has(span.glyphicon-list-alt), a[ng-click*='mostrarDetalle']").first
+                    
+                    if await enlace_detalle_modal.count() > 0 and await enlace_detalle_modal.is_visible():
+                        nombre_archivo_detalle = f"detalle_{num_formulario}_{num_orden}.pdf"
+                        ruta_local_detalle = f"D:/Buzon_SUNAT_Clientes/Temp_DDJJ/{nombre_archivo_detalle}"
+                        try:
+                            print(f"         [MODAL-DETALLE] Detectado PDT 0621. Abriendo desglose de casillas...")
+                            await enlace_detalle_modal.scroll_into_view_if_needed()
+                            await enlace_detalle_modal.click(force=True, timeout=5000)
+                            
+                            selector_guardar_detalle = "button[ng-click*='guardarDeclaracion'], button[tkey='constancia-boton-guardar']"
+                            boton_guardar_detalle = page.locator(selector_guardar_detalle).first
+                            
+                            await boton_guardar_detalle.wait_for(state="visible", timeout=6000)
+                            await boton_guardar_detalle.scroll_into_view_if_needed()
+                            
+                            async with page.expect_download(timeout=10000) as download_info_detalle:
+                                await boton_guardar_detalle.click(force=True)
+                            await (await download_info_detalle.value).save_as(ruta_local_detalle)
+                            
+                            ruta_storage_detalle = f"{ruc}/detalle_{num_orden}_{nombre_archivo_detalle}"
+                            with open(ruta_local_detalle, "rb") as f_bin_detalle:
+                                await loop.run_in_executor(None, lambda: supabase.storage.from_("adjuntos-sunat").upload(
+                                    file=f_bin_detalle, path=ruta_storage_detalle,
+                                    file_options={"content-type": "application/pdf", "x-upsert": "true"}
+                                ))
+                            
+                            url_publica_detalle = supabase.storage.from_("adjuntos-sunat").get_public_url(ruta_storage_detalle)
+                            registros_adjuntos_ddjj.append({
+                                "ruc": ruc, "num_orden": num_orden, "nombre_archivo": nombre_archivo_detalle, "url_storage": url_publica_detalle
+                            })
+                            print(f"         [STORAGE] ¡PDF Detalle guardado en la nube con éxito!")
+                            
+                            boton_cerrar_detalle = page.locator("button:has-text('Cerrar'), button[data-dismiss='modal'], .modal-header .close").first
+                            if await boton_cerrar_detalle.count() > 0:
+                                await boton_cerrar_detalle.click(force=True)
+                            await page.keyboard.press("Escape")
+                        except Exception:
+                            await page.keyboard.press("Escape")
+                        finally:
+                            if os.path.exists(ruta_local_detalle):
+                                os.remove(ruta_local_detalle)
+                else:
+                    print(f"         [SKIP-DETALLE] Form {num_formulario} omitido estratégicamente por casuística de diseño de SUNAT.")
+
+                # Compilación inmutable del payload maestro
+                registros_maestro_ddjj.append({
+                    "ruc": ruc, "num_formulario": num_formulario,
+                    "des_formulario": des_formulario.strip() if des_formulario else "DECLARACIÓN JURADA",
+                    "num_orden": num_orden, "periodo": periodo_iso, 
+                    "fecha_presentacion": fecha_postgres, "total_pagado": total_pagado,
+                    "tipo_declaracion": tipo_declaracion
+                })
+                
+            except Exception:
+                continue
+
+        # =====================================================================
+        # --- INYECCIÓN EN BASE DE DATOS MASIVA SIMULTÁNEA (SUPABASE) ---
+        # =====================================================================
+        if registros_maestro_ddjj:
+            print(f"   [BOT-DDJJ] Subiendo {len(registros_maestro_ddjj)} registros a la tabla declaraciones_sunat...")
+            await loop.run_in_executor(None, lambda: supabase.table("declaraciones_sunat").upsert(registros_maestro_ddjj, on_conflict="ruc,num_orden").execute())
+            
+            if registros_adjuntos_ddjj:
+                print(f"   [BOT-DDJJ] Sincronizando enlaces físicos en declaraciones_adjuntos...")
+                for adj_item in registros_adjuntos_ddjj:
+                    await loop.run_in_executor(None, lambda item=adj_item: supabase.table("declaraciones_adjuntos")
+                                               .delete().eq("ruc", item["ruc"]).eq("num_orden", item["num_orden"]).eq("nombre_archivo", item["nombre_archivo"]).execute())
+                await loop.run_in_executor(None, lambda: supabase.table("declaraciones_adjuntos").insert(registros_adjuntos_ddjj).execute())
+                
+            print(f"[SISTEMA-DDJJ] Sincronización masiva finalizada con éxito para el RUC: {ruc}.")
+
+        os.makedirs("D:/Buzon_SUNAT_Clientes/Evidencia_DDJJ", exist_ok=True)
+        await page.screenshot(path=f"D:/Buzon_SUNAT_Clientes/Evidencia_DDJJ/{ruc}_ddjj.png", full_page=True)
+
+    except Exception as e:
+        print(f"[ERROR CRÍTICO] Falló el procesamiento de las DDJJ para el RUC {ruc}: {str(e)}")
+    finally:
+        await context.close()
+
+# =====================================================================
+# 🧭 ORQUESTADOR PRINCIPAL DEL BUCLE MULTICLIENTE
+# =====================================================================
+async def run():
+    print("[SISTEMA-DDJJ] Consultando lista de empresas activas en Supabase...")
+    try:
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(None, lambda: supabase.table("empresas").select("ruc, nombre, usuario_sol, clave_sol").eq("activo", True).execute())
+        empresas_activas = response.data
+    except Exception as e:
+        print(f"[ERROR CRÍTICO] No se pudo conectar a la tabla de empresas: {str(e)}")
+        return
+
+    if not empresas_activas:
+        print("[AVISO] No hay empresas activas en el sistema contable.")
+        return
+
+    print(f"[SISTEMA-DDJJ] Se encontraron {len(empresas_activas)} empresas activas para procesar.")
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        for empresa in empresas_activas:
+            try:
+                await procesar_ddjj_empresa(browser, empresa["ruc"], empresa["usuario_sol"], empresa["clave_sol"], empresa["nombre"])
+            except Exception:
+                continue
+        await browser.close()
+    print("\n[SISTEMA-DDJJ] Orquestador finalizado. Proceso multicliente terminado de forma autónoma.")
+
+if __name__ == "__main__":
+    asyncio.run(run())
