@@ -1,0 +1,187 @@
+        # ➕ INTERCEPTOR MAESTRO: APERTURA DEL DESGLOSE PRINCIPAL (CÓDIGO COMPLETO UNIFICADO Y CORREGIDO)
+        print("[IA-WEB] Detectando fila resumen para desplegar los detalles internos de AFP...")
+        try:
+            # Buscamos la celda utilizando la clase 'desplazar' que nos compartiste del HTML real
+            btn_desplegar_mas = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//tr[contains(@id, 'fila1')]//td[contains(@class, 'desplazar')]")
+            ))
+            print("   [IA-WEB] Haciendo clic en la celda de expansión para abrir la tabla...")
+            
+            # Intento 1: Clic nativo de Selenium
+            try:
+                btn_desplegar_mas.click()
+            except:
+                # Intento 2: Clic forzado por JavaScript si el nativo se bloquea por el icono <i>
+                driver.execute_script("arguments[0].click();", btn_desplegar_mas)
+                
+            time.sleep(3.5) # Tiempo prudente para que el sub-DOM expuesto cargue sus filas blancas
+            print("   [IA-WEB] Grilla expandida con éxito.")
+        except Exception as e_desglose:
+            print(f"   [AVISO] Fila de expansión no detectada o ya abierta: {str(e_desglose)}")
+
+        afps_auditadas_bucle = []
+        while True:
+            time.sleep(2.5)
+            filas = driver.find_elements(By.XPATH, "//tr[@class='filaevento']")
+            if len(filas) == 0: 
+                print("   [IA-WEB] Bandeja vacía confirmada en portal web.")
+                break
+
+            fila_blanco = None
+            nombre_afp_actual = ""
+            
+            for index, f in enumerate(filas):
+                try:
+                    # En tu HTML, la primera celda es el nombre de la AFP (HABITAT)
+                    nombre_afp = f.find_element(By.XPATH, "./td[1]").text.strip().upper()
+                except: 
+                    continue
+                if nombre_afp in afps_auditadas_bucle: 
+                    continue
+                
+                texto_linea = f.text.upper().replace(" ", "")
+                if "PRESENTADA" in texto_linea or "PENDIENTE" in texto_linea or "PAGADA" in texto_linea:
+                    fila_blanco = f
+                    nombre_afp_actual = nombre_afp
+                    break
+
+            if fila_blanco is None: 
+                break
+
+            # 🛠️ CORRECCIÓN DE REPARACIÓN RADICAL: Eliminado "objective" por "objetivo" en su lugar correcto
+            if nombre_afp_objetivo != "TODAS" and nombre_afp_actual != nombre_afp_objetivo:
+                afps_auditadas_bucle.append(nombre_afp_actual)
+                continue
+
+            print(f"   [IA-WEB] -> Absorbiendo datos reales del portal para: {nombre_afp_actual}...")
+            try:
+                # Extraemos todas las celdas de la fila para mapear por índices de lista (0 a 10) de forma segura
+                celdas = fila_blanco.find_elements(By.TAG_NAME, "td")
+                
+                if len(celdas) < 5:
+                    print("   [AVISO] Fila con estructura incompleta en el portal.")
+                    continue
+
+                # ASIGNACIÓN CORREGIDA SEGÚN LAS COLUMNAS DE TU GRILLA HTML REAL:
+                # celdas[0] = AFP (HABITAT) | celdas[1] = N° de Planilla | celdas[2] = Nominal Fondo
+                num_planilla = celdas[1].text.strip()
+                num_trabajadores = "0"
+                
+                nominal_fondo_raw = celdas[2].text.strip()
+                nominal_ryr_raw = celdas[3].text.strip()
+                total_deuda_raw = celdas[2].text.strip() 
+                
+                estado_portal_raw = celdas[4].text.strip()
+                fecha_venc_raw = celdas[6].text.strip() 
+                fecha_pago_raw = celdas[7].text.strip()
+                num_ticket = celdas[8].text.strip()
+                
+                # SANITIZACIÓN CON SALVAVIDAS EXTREMO: Si el texto está vacío tras limpiar, usa "0"
+                fondo_clean_str = re.sub(r"[^\d.]", "", nominal_fondo_raw)
+                fondo_clean = float(fondo_clean_str) if fondo_clean_str != "" else 0.00
+                
+                ryr_clean_str = re.sub(r"[^\d.]", "", nominal_ryr_raw)
+                ryr_clean = float(ryr_clean_str) if ryr_clean_str != "" else 0.00
+                
+                total_clean_str = re.sub(r"[^\d.]", "", total_deuda_raw)
+                total_clean = float(total_clean_str) if total_clean_str != "" else 0.00
+                
+                fecha_pago_real = fecha_pago_raw if (fecha_pago_raw and "---" not in fecha_pago_raw and fecha_pago_raw.strip() != "") else "Sin Pago"
+                estado_pago_calculado = "Pagado" if "PAGADA" in estado_portal_raw.upper() else "Planilla Declarada"
+                
+                fecha_exp_postgres = datetime.now(zona_peru).strftime("%Y-%m-%d 23:59:59")
+                if fecha_venc_raw and "/" in fecha_venc_raw:
+                    try:
+                        fecha_exp_postgres = datetime.strptime(fecha_venc_raw.strip(), "%d/%m/%Y").strftime("%Y-%m-%d 23:59:59")
+                    except: 
+                        pass
+
+                # 🚀 INYECCIÓN MAESTRA SINCRONIZADA CON LA NUBE
+                registro_planilla = {
+                    "ruc": ruc, "num_planilla": num_planilla, "periodo": periodo_auditoria,
+                    "fecha_declaracion": datetime.now(zona_peru).strftime("%Y-%m-%d %H:%M:%S"),
+                    "total_deuda_afp": total_clean, "num_trabajadores": 0,
+                    "estado_planilla": "Declarada", "afp_nombre": nombre_afp_actual,
+                    "nominal_fondo": fondo_clean, "nominal_ryr": ryr_clean
+                }
+                supabase.table("afp_planillas").upsert(registro_planilla, on_conflict="ruc,periodo,afp_nombre").execute()
+
+                if num_ticket and "Sin Ticket" not in num_ticket and num_ticket.strip() != "" and num_ticket != "---":
+                    registro_ticket = {
+                        "ruc": ruc, "num_planilla": num_planilla, "num_ticket": num_ticket,
+                        "monto_ticket": total_clean, "fecha_expiracion": fecha_exp_postgres,
+                        "estado_pago": estado_pago_calculado, "vigente": True, "afp_nombre": nombre_afp_actual,
+                        "fecha_pago_real_str": fecha_pago_real 
+                    }
+                    supabase.table("afp_tickets").upsert(registro_ticket, on_conflict="ruc,num_ticket").execute()
+                    print(f"   [📥 SINCRO NUBE SUCCESS] {nombre_afp_actual} actualizada desde portal web.")
+
+                # INTERCEPTOR DE PESTAÑAS FLOTANTES DE IMPRESIÓN
+                try:
+                    pestaña_principal = driver.current_window_handle
+                    btn_imprimir = fila_blanco.find_element(By.XPATH, ".//button[contains(., 'Imprimir')]")
+                    driver.execute_script("arguments[0].click();", btn_imprimir)
+                    time.sleep(3.0)
+                    if len(driver.window_handles) > 1:
+                        for p in driver.window_handles:
+                            if p != pestaña_principal:
+                                driver.switch_to.window(p)
+                                driver.close()
+                        driver.switch_to.window(pestaña_principal)
+                except: 
+                    pass
+
+                afps_auditadas_bucle.append(nombre_afp_actual)
+                break 
+            except Exception as e_fila:
+                print(f"   [AVISO] Reintentando procesamiento de fila: {str(e_fila)}")
+                if nombre_afp_actual:
+                    afps_auditadas_bucle.append(nombre_afp_actual)
+
+
+                # 🚀 INYECCIÓN MAESTRA SINCRONIZADA CON LA NUBE
+                registro_planilla = {
+                    "ruc": ruc, "num_planilla": num_planilla, "periodo": periodo_auditoria,
+                    "fecha_declaracion": datetime.now(zona_peru).strftime("%Y-%m-%d %H:%M:%S"),
+                    "total_deuda_afp": total_clean, "num_trabajadores": 0,
+                    "estado_planilla": "Declarada", "afp_nombre": nombre_afp_actual,
+                    "nominal_fondo": fondo_clean, "nominal_ryr": ryr_clean
+                }
+                supabase.table("afp_planillas").upsert(registro_planilla, on_conflict="ruc,periodo,afp_nombre").execute()
+
+                if num_ticket and "Sin Ticket" not in num_ticket and num_ticket.strip() != "" and num_ticket != "---":
+                    registro_ticket = {
+                        "ruc": ruc, "num_planilla": num_planilla, "num_ticket": num_ticket,
+                        "monto_ticket": total_clean, "fecha_expiracion": fecha_exp_postgres,
+                        "estado_pago": estado_pago_calculado, "vigente": True, "afp_nombre": nombre_afp_actual,
+                        "fecha_pago_real_str": fecha_pago_real 
+                    }
+                    supabase.table("afp_tickets").upsert(registro_ticket, on_conflict="ruc,num_ticket").execute()
+                    print(f"   [📥 SINCRO NUBE SUCCESS] {nombre_afp_actual} actualizada desde portal web.")
+
+                # INTERCEPTOR DE PESTAÑAS FLOTANTES DE IMPRESIÓN
+                try:
+                    pestaña_principal = driver.current_window_handle
+                    btn_imprimir = fila_blanco.find_element(By.XPATH, ".//button[contains(., 'Imprimir')]")
+                    driver.execute_script("arguments[0].click();", btn_imprimir)
+                    time.sleep(3.0)
+                    if len(driver.window_handles) > 1:
+                        for p in driver.window_handles:
+                            if p != pestaña_principal:
+                                driver.switch_to.window(p)
+                                driver.close()
+                        driver.switch_to.window(pestaña_principal)
+                except: pass
+
+                afps_auditadas_bucle.append(nombre_afp_actual)
+                break 
+            except Exception as e_fila:
+                print(f"   [AVISO] Reintentando procesamiento de fila: {str(e_fila)}")
+                if nombre_afp_actual:
+                    afps_auditadas_bucle.append(nombre_afp_actual)
+
+    except Exception as e_glob:
+        print(f"   [ERROR CRÍTICO] Caída en el procesamiento web: {str(e_glob)}")
+    finally:
+        try: driver.find_element(By.LINK_TEXT, "Cerrar Sesión").click()
+        except: pass
