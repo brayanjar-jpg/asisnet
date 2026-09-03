@@ -1,43 +1,579 @@
-<div class="row p-0 m-0 mb-2">
-                <div class="col-sm-12 form-group form-inline mb-0">
-                    <label class="col-form-label col-form-label-sm w-180px-fixed justify-content-start">Periodo de Devengue:</label>
-                    <div class="w-rest-180px">
-                        <div class="w-170px-fixed d-inline-block">
-                            <div class="input-group input-group-sm">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text justify-content-center w-60px-fixed">Inicial</span>
-                                </div>
-                                <select class="form-control form-control-sm ignore" data-control="periodo-devengue" data-rango="inicio" data-val="true" data-val-required="Campo obligatorio" id="PeriodoDevengueInicial" name="PeriodoDevengueInicial">
-                                    <option value="">Seleccione</option>
-                                <option value="202609">2026-09</option>
-<option selected="selected" value="202608">2026-08</option>
-<option value="202607">2026-07</option>
-<option value="202606">2026-06</option>
-<option value="202605">2026-05</option>
-<option value="202604">2026-04</option>
-<option value="202603">2026-03</option>
-<option value="202602">2026-02</option>
-<option value="202601">2026-01</option>
+<table id="gvw-planilla" class="table table-sm nofreeze">
+                            <thead class="header">
+                                <tr>
+                                    <th scope="col" class="text-no-wrap">&nbsp;</th>
+                                    <th scope="col" class="text-no-wrap">Devengue</th>
+                                    <th scope="col" class="text-no-wrap">Total<br>Fondo de Pensiones</th>
+                                    <th scope="col" class="text-no-wrap">Total<br>Retenciones y Retribuciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    <tr id="fila1_action" class="collapsed" data-bs-toggle="collapse" href="#fila1" role="button" aria-expanded="false" aria-controls="fila1">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-07</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila1" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
 
-</select>
-                            </div>
-                        </div>
-                        <span class="ml-1 field-validation-valid" data-valmsg-for="PeriodoDevengueInicial" data-valmsg-replace="true"></span>
-                        &nbsp;
-                        <div class="w-170px-fixed d-inline-block">
-                            <div class="input-group input-group-sm">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text justify-content-center w-60px-fixed">Final</span>
-                                </div>
-                                <select class="form-control form-control-sm ignore valid" data-control="periodo-devengue" data-rango="fin" data-val="true" data-val-required="Campo obligatorio" id="PeriodoDevengueFinal" name="PeriodoDevengueFinal" aria-describedby="PeriodoDevengueFinal-error" aria-invalid="false">
-                                    
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila1_2610626093" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610626093
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                05/08/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                19/08/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6543993875
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('avEEKZ0Vg6AMSeMrmpKv','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
 
 
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
 
-<option value="">Seleccione</option><option value="202609">2026-09</option><option value="202608">2026-08</option></select>
-                            </div>
-                        </div>
-                        <span class="ml-1 field-validation-valid" data-valmsg-for="PeriodoDevengueFinal" data-valmsg-replace="true"></span>
-                    </div>
-                </div>
-            </div>
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    <tr id="fila2_action" class="collapsed" data-bs-toggle="collapse" href="#fila2" role="button" aria-expanded="false" aria-controls="fila2">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-06</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila2" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
+
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila2_2610529760" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610529760
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                04/07/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                24/07/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6539209957
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('mDNEQZNBL0NZhey7Wrzw','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    <tr id="fila3_action" class="collapsed" data-bs-toggle="collapse" href="#fila3" role="button" aria-expanded="false" aria-controls="fila3">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-05</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila3" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
+
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila3_2610455643" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610455643
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                05/06/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                12/06/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6535317887
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BANBIF
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('VD22kNEV0R2ptWX4yPJD','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    <tr id="fila4_action" class="collapsed" data-bs-toggle="collapse" href="#fila4" role="button" aria-expanded="false" aria-controls="fila4">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-04</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila4" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
+
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila4_2610405054" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610405054
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                26/05/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                27/05/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6532897211
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('eqy2RzJGkM2OHr9VRM2w','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    <tr id="fila5_action" class="collapsed" data-bs-toggle="collapse" href="#fila5" role="button" aria-expanded="false" aria-controls="fila5">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-03</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila5" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
+
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila5_2610405047" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610405047
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                26/05/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                27/05/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6532896789
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('mDNEQZNBL0E8uenolMow','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    <tr id="fila6_action" class="collapsed" data-bs-toggle="collapse" href="#fila6" role="button" aria-expanded="false" aria-controls="fila6">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-02</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila6" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
+
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila6_2610201063" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610201063
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                09/03/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                10/03/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6522604682
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('NwRJjn7OolRoHedZ8bZw','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    <tr id="fila7_action" class="collapsed" data-bs-toggle="collapse" href="#fila7" role="button" aria-expanded="false" aria-controls="fila7">
+                                        <td class="text-center desplazar" style="width:36px !important;">
+                                            <i class="fa" aria-hidden="true"></i>
+                                        </td>
+                                        <td class="text-center">2026-01</td>
+                                        <td class="text-right"> 10.00</td>
+                                        <td class="text-right"> 1.37</td>
+                                    </tr>
+                                    <tr class="collapse" id="fila7" data-bs-parent="#gvw-planilla">
+                                        <td>&nbsp;</td>
+                                        <td colspan="4" class="text-center justify-content-center">
+
+                                            <table class="table table-sm table-fit">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-no-wrap">AFP</th>
+                                                        <th class="text-no-wrap">N° de Planilla</th>
+                                                        <th class="text-no-wrap">Nominal Fondo</th>
+                                                        <th class="text-no-wrap">Nominal RyR</th>
+                                                        <th class="text-no-wrap">Estado</th>
+                                                        <th class="text-no-wrap">Tipo de Trabajador</th>
+                                                        <th class="text-no-wrap">F. Declaración</th>
+                                                        <th class="text-no-wrap">F. Pago</th>
+                                                        <th class="text-no-wrap">N° de Ticket</th>
+                                                        <th class="text-no-wrap">Banco</th>
+                                                        <th class="text-no-wrap">Forma de Pago</th>
+                                                        <th style="min-width:540px !important;">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                        <tr id="fila7_2610112047" class="filaevento">
+                                                            <td class="text-no-wrap text-left">
+                                                                HABITAT
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                2610112047
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                10.00
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                1.37
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PAGADA
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                DEPENDIENTE
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                06/02/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-center">
+                                                                12/02/2026
+                                                            </td>
+                                                            <td class="text-no-wrap text-right">
+                                                                6518279785
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                BBVA CONTINENTAL
+                                                            </td>
+                                                            <td class="text-no-wrap text-left">
+                                                                PT
+                                                            </td>
+                                                            <td class="text-no-wrap text-center form-inline">
+                                                                <button class="btn btn-sm btn-success" onclick="ImprimirPlanillaDeclaracion('ZqjZNzWVMd5ytg4mzoyq','RJjV5zrJXJhWzzAE3WZ8U5ON1oY','S')">Imprimir</button>
+
+
+                                                                    <button class="btn btn-sm btn-danger" disabled="">Anular</button>
+                                                                    <button class="btn btn-sm btn-info" disabled="">Pagar en Línea</button>
+                                                                    <button class="btn btn-sm btn-info btn-ticket-vista-previa" disabled="">Emitir Ticket</button>
+                                                            </td>
+                                                            </tr>
+
+
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                </tbody>
+                            </table>
