@@ -91,8 +91,7 @@ for emp in lista_empresas:
 
 
 
-    # 🚀 PARTE 5 DE 11: CONFIGURACIÓN DE CAMUFLAJE CON DESCARGA AUTOMÁTICA FORZADA
-    # 🚀 PARTE 5 DE 11: CONFIGURACIÓN DE CAMUFLAJE Y MODOS DE IMPRESIÓN SILENCIOSA
+     # 🚀 PARTE 5 DE 11: CONFIGURACIÓN DE CAMUFLAJE Y MODOS DE IMPRESIÓN SILENCIOSA
     print("   [IA-AUDITOR] Desplegando Google Chrome con camuflaje y automatización de PDFs...")
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")
@@ -112,11 +111,12 @@ for emp in lista_empresas:
         "savefile.default_directory": CARPETA_PLANILLA, # Envía el PDF a D:\afpnet
         "download.default_directory": CARPETA_PLANILLA,
         "download.prompt_for_download": False,         # Desactiva alertas de descarga
+        "download.directory_upgrade": True,            # Fuerza a Chrome a usar la ruta definida sin preguntar
         "plugins.always_open_pdf_externally": True
     })
     
-    # 🧬 BANDERAS DE KIOSKO: Ejecutan la impresión en segundo plano sin cuadros de Windows
-    options.add_argument("--incognito")
+    # 🧬 BANDERAS DE MODO INVITADO Y KIOSKO: Navegación limpia y descargas automáticas
+    options.add_argument("--guest")                   # 👈 ACTIVA EL MODO INVITADO (Evita vinculación con Gmail)
     options.add_argument("--kiosk-printing")           # 🛠️ CAPTURA EL POPUP DE IMPRESIÓN Y LO GUARDA EN SILENCIO
     options.add_argument("--disable-gpu")
     options.add_argument("--ignore-certificate-errors")
@@ -129,6 +129,7 @@ for emp in lista_empresas:
     })
     
     wait = WebDriverWait(driver, 25)
+
 
 
     try:
