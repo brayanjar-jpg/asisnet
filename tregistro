@@ -1,290 +1,49 @@
-# =====================================================================
-# PARTES 1 A 3: CONFIGURACIÓN GENERAL Y CREDENCIALES DE BASE DE DATOS
-# =====================================================================
-import asyncio
-import os
-import re
-import pdfplumber
-from datetime import datetime
-from playwright.async_api import async_playwright
-from supabase import create_client, Client
+package com.example.asisnet_contable
 
-# Configuración de base de datos
-SUPABASE_URL = "https://atryivflkhjsynrqzora.supabase.co"
-SUPABASE_KEY = "sb_publishable_ivz6H-WHRkaeQs7k8HOd_Q_k5xzhzbm"
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TregistroDashboard(onBackClick: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Dashboard T-Registro") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Control de Trabajadores Activos",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-try:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-except Exception as e:
-    print(f"[ERROR] No se pudo conectar a Supabase: {e}")
+            Text("Sincronización con Supabase relacional lista.")
 
-# URL de autenticación del Menú SOL
-URL_LOGIN_SUNAT = "https://api-seguridad.sunat.gob.pe/v1/clientessol/4f3b88b3-d9d6-402a-b85d-6a0bc857746a/oauth2/loginMenuSol?lang=es-PE&showDni=true&showLanguages=false&originalUrl=https://e-menu.sunat.gob.pe/cl-ti-itmenu/AutenticaMenuInternet.htm&state=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAADdAADZXhlcHQABnBhcmFtc3QASyomKiYvY2wtdGktaXRtZW51L01lbnVJbnRlcm5ldC5odG0mYjY0ZDI2YThiNWFmMDkxOTIzYjIzYjY0MDdhMWMxZGI0MWU3MzNhNnQABGV4ZWNweA=="
-
-# Ruta local fija para depositar las constancias TRA
-CARPETA_SUNAT = r"D:\sunat_tregistro"
-if not os.path.exists(CARPETA_SUNAT):
-    os.makedirs(CARPETA_SUNAT)
-async def procesar_tregistro_empresa(ruc, usuario, clave, browser):
-    print(f"\n   [IA-AUDITOR] Iniciando procesamiento para RUC: {ruc}")
-    context = await browser.new_context(accept_downloads=True)
-    page = await context.new_page()
-    
-    try:
-        print("   [SOL-LOGIN] Abriendo formulario SUNAT...")
-        await page.goto(URL_LOGIN_SUNAT, timeout=45000)
-        await page.wait_for_timeout(2000)
-        
-        await page.click("#btnPorRuc")
-        await page.wait_for_timeout(500)
-        await page.fill("#txtRuc", ruc)
-        await page.fill("#txtUsuario", usuario)
-        await page.fill("#txtContrasena", clave)
-        
-        print("   [SOL-LOGIN] Enviando credenciales...")
-        await page.click("#btnAceptar")
-        await page.wait_for_timeout(5000)
-        
-        # 🔑 TRUCO MAESTRO: Salto de página directo sin clonar ningún token
-        url_tregistro = "https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?action=execute&code=10.5.3.1.1&s=ww1"
-        print("   [BYPASS] Ejecutando salto directo a la plataforma de T-Registro...")
-        await page.goto(url_tregistro, timeout=45000)
-        await page.wait_for_timeout(4000)
-        
-        print("   [T-REGISTRO] Cargando grilla de trabajadores...")
-        await page.wait_for_selector("iframe", timeout=15000)
-        
-        frame_tregistro = None
-        for frame in page.frames:
-            if "menu" not in frame.url and "itmenu" not in frame.url:
-                frame_tregistro = frame
-                break
-        if not frame_tregistro:
-            frame_tregistro = page.main_frame
-            
-        # 🔑 CORRECCIÓN: Esperamos de forma segura usando selectores de texto puros de Playwright
-        await frame_tregistro.wait_for_selector("text=TRA", timeout=15000)
-        
-        # 🔑 CORRECCIÓN: Ubicamos las tablas con la clase nativa que me pasaste en tu HTML
-        filas = await frame_tregistro.query_selector_all("table.dojoxGridRowTable")
-        total_trabajadores = len(filas)
-        print(f"   [T-REGISTRO] Éxito: Detectadas {total_trabajadores} tablas de empleados.")
-        
-        lista_trabajadores = []
-        
-        for i in range(total_trabajadores):
-            # Extraemos las celdas (td) de la tabla del empleado actual
-            celdas = await filas[i].query_selector_all("td.dojoxGridCell")
-            
-            if len(celdas) >= 6:
-                # Mapeo según tu HTML real: celda 1 = Identidad, celda 2 = Nombres, celda 5 = Estado
-                doc_identidad = await celdas[1].inner_text()
-                apellidos_nombres = await celdas[2].inner_text()
-                estado_sunat = await celdas[5].inner_text()
-                
-                # Extraemos y limpiamos el DNI dejando solo los 8 números
-                dni_limpio = "".join(re.findall(r'\d+', doc_identidad))
-                print(f"      [SCRAPING] Leyendo: {dni_limpio} - {apellidos_nombres}")
-                
-                # Localizamos el enlace que contiene el texto exacto TRA en esta fila
-                boton_descarga = await celdas[0].query_selector("a")
-                
-                if boton_descarga:
-                    try:
-                        async with page.expect_download(timeout=10000) as download_info:
-                            await boton_descarga.click()
-                        download = await download_info.value
-                        nombre_pdf = f"TRA_{ruc}_{dni_limpio}.pdf"
-                        await download.save_as(os.path.join(CARPETA_SUNAT, nombre_pdf))
-                        print(f"      [DESCARGA] Guardado: {nombre_pdf}")
-                    except Exception as e_dl:
-                        print(f"      [ALERTA] Falló descarga PDF de DNI {dni_limpio}: {e_dl}")
-                
-                lista_trabajadores.append({
-                    "ruc_empresa": ruc,
-                    "dni": dni_limpio,
-                    "nombres_completos": apellidos_nombres.strip(),
-                    "estado_sunat": estado_sunat.strip(),
-                    "ruta_archivo_pdf": os.path.join(CARPETA_SUNAT, f"TRA_{ruc}_{dni_limpio}.pdf"),
-                    "actualizado_el": datetime.now().isoformat()
-                })
-        return lista_trabajadores
-    except Exception as e:
-        print(f"   [ERROR-PROCESO] Caída en RUC {ruc}: {e}")
-        return []
-    finally:
-        await page.close()
-        await context.close()
-
-
-def extraer_datos_profundos_pdf(ruta_pdf):
-    datos = {
-        "fecha_nacimiento": None, "sexo": None, "celular": None, "email": None, "direccion": None,
-        "categoria_ocupacional": None, "ocupacion_cargo": None, "tipo_contrato": None, "fecha_inicio_labores": None,
-        "regimen_salud": None, "fecha_inicio_salud": None, "entidad_prestadora": None,
-        "regimen_pensionario": None, "fecha_inicio_pension": None, "cuspp": None
+            Spacer(modifier = Modifier.height(40.dp))
+            Button(onClick = onBackClick) {
+                Text("Volver al Menú")
+            }
+        }
     }
-    
-    if not os.path.exists(ruta_pdf):
-        print(f"      [ALERTA-PDF] El archivo no existe físicamente: {ruta_pdf}")
-        return datos
-
-    try:
-        with pdfplumber.open(ruta_pdf) as pdf:
-            texto_completo = ""
-            for pagina in pdf.pages:
-                texto_pag = pagina.extract_text()
-                if texto_pag:
-                    texto_completo += texto_pag + "\n"
-            
-            lineas = [l.strip() for l in texto_completo.split("\n") if l.strip()]
-            texto_limpio = "\n".join(lineas)
-            
-            match_nac = re.search(r"Fecha de Nacimiento:\s*([\d/]+)", texto_limpio, re.IGNORECASE)
-            if match_nac: datos["fecha_nacimiento"] = match_nac.group(1)
-            
-            match_sexo = re.search(r"Sexo:\s*([A-Za-z]+)", texto_limpio, re.IGNORECASE)
-            if match_sexo: datos["sexo"] = match_sexo.group(1)
-            
-            match_cel = re.search(r"Teléfono:\s*([\d\-]+)", texto_limpio, re.IGNORECASE)
-            if match_cel: datos["celular"] = match_cel.group(1)
-            
-            match_mail = re.search(r"Correo Electrónico:\s*([^\s@]+@[^\s@]+\.[^\s@]+)", texto_limpio, re.IGNORECASE)
-            if match_mail: datos["email"] = match_mail.group(1)
-
-            match_cat = re.search(r"Categoría Ocupacional:\s*(.+)", texto_limpio, re.IGNORECASE)
-            if match_cat: datos["categoria_ocupacional"] = match_cat.group(1).strip()
-            
-            match_ocu = re.search(r"Ocupación/Cargo:\s*(.+)", texto_limpio, re.IGNORECASE)
-            if match_ocu: datos["ocupacion_cargo"] = match_ocu.group(1).strip()
-            
-            match_cont = re.search(r"Tipo de Contrato:\s*(.+)", texto_limpio, re.IGNORECASE)
-            if match_cont: datos["tipo_contrato"] = match_cont.group(1).strip()
-
-            if "ESSALUD REGULAR" in texto_limpio:
-                datos["regimen_salud"] = "ESSALUD REGULAR"
-                match_f_salud = re.search(r"ESSALUD REGULAR\s+([\d/]+)", texto_limpio)
-                if match_f_salud: datos["fecha_inicio_salud"] = match_f_salud.group(1)
-
-            match_pen = re.search(r"(SPP\s+[A-Za-z]+|ONP)", texto_limpio, re.IGNORECASE)
-            if match_pen:
-                datos["regimen_pensionario"] = match_pen.group(1).strip()
-                match_datos_pen = re.search(r"(?:SPP\s+[A-Za-z]+|ONP)\s+([\d/]+)\s+(?:-|\s+)\s*([A-Z0-9]+)?", texto_limpio, re.IGNORECASE)
-                if match_datos_pen:
-                    datos["fecha_inicio_pension"] = match_datos_pen.group(1)
-                    if match_datos_pen.group(2):
-                        datos["cuspp"] = match_datos_pen.group(2)
-            
-            datos["fecha_inicio_labores"] = datos["fecha_inicio_pension"] or datos["fecha_inicio_salud"] or datetime.now().strftime("%d/%m/%Y")
-            
-        return datos
-    except Exception as e_pdf:
-        print(f"      [ALERTA-PDF] Error procesando texto con pdfplumber: {e_pdf}")
-        return datos
-
-
-# =====================================================================
-# PARTE 2: BASE DE DATOS RELACIONAL (guardar_trabajadores_supabase)
-# =====================================================================
-async def guardar_trabajadores_supabase(datos_lista):
-    if not datos_lista: 
-        return
-    try:
-        print(f"   [SUPABASE] Iniciando procesamiento y lectura profunda para {len(datos_lista)} empleados...")
-        
-        for t in datos_lista:
-            ruta_pdf_local = t["ruta_archivo_pdf"]
-            print(f"      [LECTOR-PDF] Abriendo y parseando: D:\\sunat_tregistro\\{os.path.basename(ruta_pdf_local)}")
-            
-            info_profunda = extraer_datos_profundos_pdf(ruta_pdf_local)
-            
-            datos_maestro = {
-                "dni": t["dni"],
-                "nombres_completos": t["nombres_completos"],
-                "fecha_nacimiento": info_profunda["fecha_nacimiento"], 
-                "sexo": info_profunda["sexo"],
-                "celular": info_profunda["celular"],
-                "email": info_profunda["email"],
-                "direccion": info_profunda["direccion"]
-            }
-            supabase.table("trabajadores_maestro").upsert(datos_maestro).execute()
-            
-            datos_laboral = {
-                "ruc_empresa": t["ruc_empresa"],
-                "dni": t["dni"],
-                "categoria_ocupacional": info_profunda["categoria_ocupacional"],
-                "ocupacion_cargo": info_profunda["ocupacion_cargo"],
-                "tipo_contrato": info_profunda["tipo_contrato"],
-                "fecha_inicio_labores": info_profunda["fecha_inicio_labores"], 
-                "fecha_fin_labores": None,
-                "estado_sunat": t["estado_sunat"],
-                "ruta_archivo_pdf": t["ruta_archivo_pdf"]
-            }
-            supabase.table("trabajadores_laboral").upsert(datos_laboral).execute()
-            
-            if info_profunda["regimen_salud"] and info_profunda["fecha_inicio_salud"]:
-                datos_salud = {
-                    "dni": t["dni"],
-                    "regimen_salud": info_profunda["regimen_salud"],
-                    "fecha_inicio": info_profunda["fecha_inicio_salud"],
-                    "fecha_fin": None,
-                    "entidad_prestadora": info_profunda["entidad_prestadora"]
-                }
-                supabase.table("trabajadores_salud").upsert(datos_salud).execute()
-                
-            if info_profunda["regimen_pensionario"] and info_profunda["fecha_inicio_pension"]:
-                datos_pension = {
-                    "dni": t["dni"],
-                    "regimen_pensionario": info_profunda["regimen_pensionario"],
-                    "fecha_inicio": info_profunda["fecha_inicio_pension"],
-                    "fecha_fin": None,
-                    "cuspp": info_profunda["cuspp"]
-                }
-                supabase.table("trabajadores_pension").upsert(datos_pension).execute()
-            
-        print("   [SUPABASE] Éxito absoluto: Las 4 tablas relacionales históricas fueron sincronizadas.")
-    except Exception as e:
-        print(f"   [ERROR-NUBE] Error crítico en el procesamiento relacional profundo: {e}")
-
-
-# =====================================================================
-# PARTE 3: ORQUESTRADOR CENTRAL (run)
-# =====================================================================
-async def run():
-    print("[SISTEMA] Iniciando Orquestador Multicliente de T-Registro...")
-    try:
-        res = supabase.table("empresas").select("*").eq("activo", True).execute()
-        lista_empresas = res.data
-        print(f"[SUPABASE] Encontradas {len(lista_empresas)} empresas marcadas con check [v].")
-    except Exception as e:
-        print(f"[ERROR-DB] No se cargó la lista de empresas: {e}")
-        return
-
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False, args=["--start-maximized", "--disable-blink-features=AutomationControlled"])
-        for empresa in lista_empresas:
-            ruc = empresa.get("ruc")
-            usuario = empresa.get("usuario_sol")
-            clave = empresa.get("clave_sol")
-            if ruc and usuario and clave:
-                trabajadores = await procesar_tregistro_empresa(ruc, usuario, clave, browser)
-                if trabajadores:
-                    await guardar_trabajadores_supabase(trabajadores)
-            await asyncio.sleep(2)
-        await browser.close()
-
-
-# =====================================================================
-# PARTE 4: PUNTO DE ARRANQUE CON DIAGNÓSTICO EN VIVO
-# =====================================================================
-if __name__ == "__main__":
-    try:
-        print("[SISTEMA] Encendiendo motores del Bot asíncrono...")
-        asyncio.run(run())
-    except KeyboardInterrupt:
-        print("\n[SISTEMA] Bot apagado manualmente.")
-    except Exception as error_global:
-        print(f"\n[ALERTA GLOBAL]: {error_global}")
-        import traceback
-        traceback.print_exc()
+}
