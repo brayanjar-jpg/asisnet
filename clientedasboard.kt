@@ -1,5 +1,5 @@
 package com.example.asisnet_contable
-
+import com.example.asisnet_contable.PostgresDriver.EmpleadoLaboral
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +39,10 @@ fun ClienteDashboard(rucUsuario: String, onLogout: () -> Unit) {
     var descargando by rememberSaveable { mutableStateOf(false) }
     var verBuzonNativo by rememberSaveable { mutableStateOf(false) }
     var cargandoBuzon by rememberSaveable { mutableStateOf(false) }
+    // 🔑 VARIABLES DE ESTADO PARA EL MÓDULO DE T-REGISTRO
+    var verTregistroNativo by rememberSaveable { mutableStateOf(false) }
+    var cargandoTregistro by rememberSaveable { mutableStateOf(false) }
+    var listaTrabajadores by remember { mutableStateOf<List<EmpleadoLaboral>>(emptyList()) }
 
     // --- BANDERAS DE CONTROL Y LISTAS MUTABLES FUERTEMENTE TIPADAS ---
     var verDdjjNativo by rememberSaveable { mutableStateOf(false) }
@@ -112,6 +116,14 @@ fun ClienteDashboard(rucUsuario: String, onLogout: () -> Unit) {
             listaDdjj = listaDdjj,
             cargandoDdjj = cargandoDdjj,
             onVolver = { verDdjjNativo = false }
+        )
+    }
+    else if (verTregistroNativo) {
+        TregistroDashboard(
+            onBackClick = {
+                // Al darle clic a volver, apagamos la pantalla y regresamos al menú principal
+                verTregistroNativo = false
+            }
         )
     }
     else if (verAfpNativo) {
@@ -244,21 +256,44 @@ fun ClienteDashboard(rucUsuario: String, onLogout: () -> Unit) {
                     }
                 }
 
-                // 👥 CARD: T-REGISTRO MÓDULO LABORAL
+                // 👥 CARD: T-REGISTRO MÓDULO LABORAL (Conectado al 100%)
                 item {
                     Card(
-                        onClick = { Toast.makeText(context, "Accediendo a T-Registro...", Toast.LENGTH_SHORT).show() },
-                        modifier = Modifier.fillMaxWidth().height(120.dp), shape = RoundedCornerShape(16.dp),
+                        onClick = {
+                            // 1. Encendemos el indicador de carga en la interfaz
+                            cargandoTregistro = true
+
+                            // 2. Disparamos una corrutina asíncrona para consultar la base de datos sin colgar la app
+                            coroutineScope.launch {
+                                try {
+                                    // Llamamos a tu nuevo método JDBC que configuramos en el PostgresDriver
+                                    listaTrabajadores = PostgresDriver.obtenerTrabajadoresPorCliente(rucUsuario)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error al cargar datos: ${e.message}", Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    // 3. Apagamos el cargando y activamos la pantalla del Dashboard
+                                    cargandoTregistro = false
+                                    verTregistroNativo = true
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(120.dp),
+                        shape = RoundedCornerShape(size = 16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize().padding(12.dp),
+                            modifier = Modifier.fillMaxSize().padding(all = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(text = "👥", fontSize = 32.sp)
-                            Text(text = "T-Registro", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6750A4))
+                            Text(
+                                text = "T-Registro",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFF6750A4)
+                            )
                         }
                     }
                 }
