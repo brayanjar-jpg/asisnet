@@ -120,8 +120,8 @@ fun ClienteDashboard(rucUsuario: String, onLogout: () -> Unit) {
     }
     else if (verTregistroNativo) {
         TregistroDashboard(
+            listaTrabajadores = listaTrabajadores, // 🚀 Aquí le pasamos la variable que ya llenó Supabase
             onBackClick = {
-                // Al darle clic a volver, apagamos la pantalla y regresamos al menú principal
                 verTregistroNativo = false
             }
         )
