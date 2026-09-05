@@ -437,64 +437,93 @@ object PostgresDriver {
     data class EmpleadoLaboral(
         val dni: String,
         val nombresCompletos: String,
-        val categoriaOcupacional: String,
-        val ocupacionCargo: String,
+        val fechaNacimiento: String,
+        val sexo: String,
+        val telefono: String,
+        val correo: String,
+        val primeraDireccion: String,
+        val paisEmisor: String,
+        val nacionalidad: String,
+        val estadoCivil: String,
+        val categoria: String,
+        val ocupacion: String,
         val tipoContrato: String,
         val fechaInicioLabores: String,
-        val estadoSunat: String
+        val estadoSunat: String,
+        val regimenLaboral: String,
+        val regimenPensionario: String,
+        val cuspp: String,
+        val regimenSalud: String,
+        val entidadPrestadora: String, // 👈 Pon la coma aquí mismo
+        val fechaInicioPension: String, // 👈 Asegúrate de que esta también tenga coma
+        val fechaInicioSalud: String, // La última línea antes del cierre ")" no lleva coma}
+        val remuneracionBasica: Double,       // 🚀 NUEVO
+        val tipoPeriodicidadPago: String,     // 🚀 NUEVO
+        val jornadaLaboral: String            // 🚀 NUEVO
     )
+
+
+
 
     // 2. Método con consulta SQL nativa JDBC (Igual que tus otras funciones)
     suspend fun obtenerTrabajadoresPorCliente(rucInput: String): List<EmpleadoLaboral> = withContext(Dispatchers.IO) {
         val lista = mutableListOf<EmpleadoLaboral>()
+        val query = "SELECT * FROM v_comprobante_tregistro WHERE ruc_empresa = ?"
+        var conexion: java.sql.Connection? = null
 
-        val query = """
-            SELECT 
-                l.dni,
-                m.nombres_completos,
-                COALESCE(l.categoria_ocupacional, 'EMPLEADO') as categoria_ocupacional,
-                COALESCE(l.ocupacion_cargo, 'SECRETARIA') as ocupacion_cargo,
-                COALESCE(l.tipo_contrato, 'POR NECES DEL MERCADO') as tipo_contrato,
-                l.fecha_inicio_labores,
-                l.estado_sunat
-            FROM public.trabajadores_laboral l
-            INNER JOIN public.trabajadores_maestro m ON l.dni = m.dni
-            WHERE l.ruc_empresa = ?
-        """.trimIndent()
-
-        var conexion: Connection? = null
         try {
-            // 🔑 USAMOS LA MISMA CONEXIÓN EXACTA DE LA AFP
             conexion = getConnection()
-
-            conexion.prepareStatement(query).use { stmt ->
-                stmt.setString(1, rucInput.trim())
-                stmt.executeQuery().use { rs ->
-                    while (rs.next()) {
-                        lista.add(
-                            EmpleadoLaboral(
-                                dni = rs.getString("dni") ?: "",
-                                nombresCompletos = rs.getString("nombres_completos") ?: "",
-                                categoriaOcupacional = rs.getString("categoria_ocupacional") ?: "EMPLEADO",
-                                ocupacionCargo = rs.getString("ocupacion_cargo") ?: "SECRETARIA",
-                                tipoContrato = rs.getString("tipo_contrato") ?: "POR NECES DEL MERCADO",
-                                fechaInicioLabores = rs.getString("fecha_inicio_labores") ?: "",
-                                estadoSunat = rs.getString("estado_sunat") ?: "Activo"
+            if (conexion != null) {
+                conexion.prepareStatement(query).use { stmt ->
+                    stmt.setString(1, rucInput.trim())
+                    stmt.executeQuery().use { rs ->
+                        while (rs.next()) {
+                            lista.add(
+                                EmpleadoLaboral(
+                                    dni = rs.getString("dni") ?: "",
+                                    nombresCompletos = rs.getString("nombres_completos") ?: "",
+                                    fechaNacimiento = rs.getString("fecha_nacimiento") ?: "",
+                                    sexo = rs.getString("sexo") ?: "",
+                                    telefono = rs.getString("telefono") ?: "",
+                                    correo = rs.getString("correo") ?: "",
+                                    primeraDireccion = rs.getString("primera_direccion") ?: "",
+                                    paisEmisor = rs.getString("pais_emisor") ?: "",
+                                    nacionalidad = rs.getString("nacionalidad") ?: "",
+                                    estadoCivil = rs.getString("estado_civil") ?: "",
+                                    categoria = rs.getString("categoria") ?: "",
+                                    ocupacion = rs.getString("ocupacion") ?: "",
+                                    tipoContrato = rs.getString("tipo_contrato") ?: "",
+                                    fechaInicioLabores = rs.getString("fecha_inicio_labores") ?: "",
+                                    estadoSunat = rs.getString("estado_sunat") ?: "Activo",
+                                    regimenLaboral = rs.getString("regimen_laboral") ?: "",
+                                    regimenPensionario = rs.getString("regimen_pensionario") ?: "Sin Régimen",
+                                    cuspp = rs.getString("cuspp") ?: "-",
+                                    regimenSalud = rs.getString("regimen_salud") ?: "Sin Cobertura",
+                                    entidadPrestadora = rs.getString("entidad_prestadora") ?: "-",
+                                    fechaInicioPension = rs.getString("fecha_inicio_pension") ?: "", // 👈 NUEVO: Coma agregada
+                                    fechaInicioSalud = rs.getString("fecha_inicio_salud") ?: "",     // 👈 NUEVO: Cierre correcto
+                                    remuneracionBasica = rs.getDouble("remuneracion_basica"),           // 🚀 NUEVO
+                                    tipoPeriodicidadPago = rs.getString("tipo_periodicidad_pago") ?: "-", // 🚀 NUEVO
+                                    jornadaLaboral = rs.getString("jornada_laboral") ?: "-"             // 🚀 NUEVO
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
-            println("   [JDBC] Trabajadores del T-Registro cargados con éxito: ${lista.size}")
         } catch (e: Exception) {
-            println("   [ERROR-JDBC] Falló la consulta de T-Registro: ${e.message}")
+            e.printStackTrace()
         } finally {
-            // Cierre manual preventivo si la conexión quedó abierta por alguna excepción
-            try { conexion?.close() } catch (_: Exception) {}
+            try {
+                conexion?.close()
+            } catch (sc: Exception) {
+                sc.printStackTrace()
+            }
         }
-
-        lista
+        return@withContext lista
     }
+
+
 
 }
 
