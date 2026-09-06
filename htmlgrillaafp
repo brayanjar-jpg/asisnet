@@ -1,9 +1,154 @@
-<div class="dijitDialog dijitDialogFocused dijitFocused" role="dialog" aria-labelledby="dlgBusqueda_title" title="" id="dlgBusqueda" widgetid="dlgBusqueda" style="width: 650px; height: 300px; position: absolute; opacity: 1; left: 382px; top: 219px; z-index: 950;">
-	<div dojoattachpoint="titleBar" class="dijitDialogTitleBar" title="B&amp;uacute;squeda de Persona">
-	<span dojoattachpoint="titleNode" class="dijitDialogTitle" id="dlgBusqueda_title">Búsqueda de Persona</span>
-	<span dojoattachpoint="closeButtonNode" class="dijitDialogCloseIcon" dojoattachevent="ondijitclick: onCancel" title="Cancelar" role="button" tabindex="-1">
-		<span dojoattachpoint="closeText" class="closeText" title="Cancelar">x</span>
-	</span>
+<div id="ctl00_ContentPlaceHolder1_pnlBusqueda" style="width:782px;">
+	
+        <div style="padding: 15px;">
+            <div class="caja_contenido" style="width: 575px">
+                <div class="caja_titulo" style="height: 35px; width: 574px;">
+                    <span class="JERF_subtitulo1">
+                        <b style="font-weight: bold;">BÚSQUEDA AFILIADO EN EL SISTEMA PRIVADO DE PENSIONES
+                        </b>
+                    </span>
+                </div>
+               
+
+     <div id="ctl00_ContentPlaceHolder1_FormBusqueda">
+		
+     <div style="padding: 15px; width: 519px;">
+     <div id="cphContent_form" class="caja_subcontenido">
+         <table border="0" cellpadding="0" cellspacing="0" width="497px">
+             <tbody><tr>
+                 <td colspan="2" class="JERF_texto2" style="color: red; text-align: left">Aviso Importante: Ingrese datos sin considerar tildes.<br><br>
+                   
+                     <hr>
+                 </td>
+             </tr>
+
+              <tr style="text-align: center">
+                   <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Tipo de Documento de Identidad</td>
+               <td height="25px" style="text-align: left">
+                     <select name="ctl00$ContentPlaceHolder1$cboTipoDoc" id="ctl00_ContentPlaceHolder1_cboTipoDoc" class="JERF_texto1 " style="padding-top: 6px; padding-bottom: 6px; border-radius: 4px; margin-top: 12px;">
+			<option value="00">DNI/Lib.Electoral</option>
+			<option value="01">Carné Extranj.</option>
+			<option value="02">Carné Mil/Pol</option>
+			<option value="03">Carné Min.trab</option>
+			<option value="04">Pasaporte</option>
+
+		</select>
+                      <span style="display:inline-block;height:25px;color: red">*</span>
+                    <br>
+                     &nbsp;
+                   <span id="ctl00_ContentPlaceHolder1_CampoObligatorio1" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar un documento de identidad</span>
+                 </td>
+            
+            </tr>
+
+             <tr>
+                 <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">N° de Documento</td>
+                
+           
+                  <td height="25px" style="text-align: left">
+                     <input name="ctl00$ContentPlaceHolder1$txtNumeroDoc" type="text" maxlength="25" id="ctl00_ContentPlaceHolder1_txtNumeroDoc" style="padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
+                       <span style="display:inline-block;height:25px;color: red">*</span>
+ <br>
+                     <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator16" class="Mensaje_Error_Net" style="color:Red;display:none;">Caracteres Inválido</span>
+                     <span id="ctl00_ContentPlaceHolder1_Validator_txtNumeroDoc2" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar un documento de identidad</span>
+
+                 </td>
+             </tr>
+
+             <tr>
+    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Apellido Paterno</td>
+    <td height="25px" style="text-align: left">
+        <input name="ctl00$ContentPlaceHolder1$txtAp_pat" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtAp_pat" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
+        <span style="display:inline-block;height:25px;color: red">*</span>
+        <br>
+        <span id="ctl00_ContentPlaceHolder1_RequiredFieldValidator2" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar el apellido paterno</span>
+        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator4" class="Mensaje_Error_Net" style="color:Red;display:none;">El apellido paterno sólo debe tener letras</span>
+    </td>
+</tr>
+<tr>
+    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Apellido Materno</td>
+    <td height="25px" style="text-align: left">
+        <input name="ctl00$ContentPlaceHolder1$txtAp_mat" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtAp_mat" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
+        <span style="display:inline-block;height:25px;color: red">*</span>
+        <br>
+        <span id="ctl00_ContentPlaceHolder1_RequiredFieldValidator3" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar el apellido materno</span>
+        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator5" class="Mensaje_Error_Net" style="color:Red;display:none;">El apellido materno sólo debe tener letras</span>
+    </td>
+</tr>
+
+<tr>
+    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Primer Nombre</td>
+    <td height="25px" style="text-align: left">
+        <input name="ctl00$ContentPlaceHolder1$txtPri_nom" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtPri_nom" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
+        <span style="display:inline-block;height:25px;color: red">*</span>
+        <br>
+        <span id="ctl00_ContentPlaceHolder1_RequiredFieldValidator4" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar el primer nombre</span>
+
+        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator6" class="Mensaje_Error_Net" style="color:Red;display:none;">El primer nombre sólo debe tener letras</span>
+       
+    </td>
+</tr>
+<tr>
+    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Segundo Nombre</td>
+    <td height="25px" style="text-align: left">
+        <input name="ctl00$ContentPlaceHolder1$txtSeg_nom" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtSeg_nom" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
+               
+        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator7" class="Mensaje_Error_Net" style="color:Red;display:none;">El segundo nombre sólo debe tener letras</span>
+       
+    </td>
+</tr>
+
+              
+
+         </tbody></table>
+
+         <table>
+            <tbody><tr>
+                <td colspan="3" class="JERF_texto2" style="padding-left: 5PX; text-align: justify">Le informamos que los datos personales que proporcione serán tratados conforme a la Ley N° 29733 y su reglamento. Si desea conocer más sobre la ley de protección de datos personales ingrese <a href="http://www.sbs.gob.pe/principal/categoria/ley-de-proteccion-de-datos-personales/4334/c-4334" target="_blank"><u>aquí</u>.</a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: right"></td>
+            </tr>
+
+             <tr>
+                <td colspan="2" class="JERF_texto2" style="color: red; text-align: left">(*) Datos obligatorios para la consulta.<br>                   
+                 </td>
+
+             </tr>
+
+        </tbody></table>
+
+
+     </div>
+ </div>
+
 	</div>
-		<div dojoattachpoint="containerNode" class="dijitDialogPaneContent" style="width: auto; height: auto;"><iframe id="fpersona" frameborder="0" scrolling="auto" src="/ol-ti-itrtpspresta/prestadores.htm?accion=buscarPersona" style="width: 100%; height: 300px;"></iframe></div>
+
+  <div id="ctl00_ContentPlaceHolder1_pnlcaptcha">
+		
+     <div style="width: 500px; height: 20px; text-align: center;">
+         <input type="submit" name="ctl00$ContentPlaceHolder1$btnBuscar" value="  Buscar  " onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$btnBuscar&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ContentPlaceHolder1_btnBuscar" class=" JERF_texto1" style="color: White; background-color: #2174E5;
+             border-color: #2174E5; height: 30px; width: 100px; border-radius: .21428571em;">&nbsp;&nbsp;                        
+     </div>
+     <div style="padding: 15px">
+         <div>
+             <table style="width: 534px; height: 65px;">
+                 <tbody>
+                     <tr>
+                         <td colspan="2" style="text-align: center;">
+                             <div id="divCaptcha" class="g-recaptcha" data-sitekey="6LdR-KUZAAAAANbQ4LKiFpqcLzkNnJ_UanjRRLg0" data-callback="DoPost" data-size="invisible"><div class="grecaptcha-badge" data-style="bottomright" style="width: 256px; height: 60px; display: block; transition: right 0.3s; position: fixed; bottom: 14px; right: -186px; box-shadow: gray 0px 0px 5px; border-radius: 2px; overflow: hidden;"><div class="grecaptcha-logo"><iframe title="reCAPTCHA" width="256" height="60" role="presentation" name="a-8y5t0kk8dpwp" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" src="https://www.google.com/recaptcha/api2/anchor?ar=1&amp;k=6LdR-KUZAAAAANbQ4LKiFpqcLzkNnJ_UanjRRLg0&amp;co=aHR0cHM6Ly9zZXJ2aWNpb3Muc2JzLmdvYi5wZTo0NDM.&amp;hl=es-419&amp;v=8x-4t2pegToiW8KmThtO4AQt&amp;size=invisible&amp;anchor-ms=20000&amp;execute-ms=30000&amp;cb=4wsbois5ajmb"></iframe></div><div class="grecaptcha-error"></div><textarea id="g-recaptcha-response" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid rgb(193, 193, 193); margin: 10px 25px; padding: 0px; resize: none; display: none;"></textarea></div><iframe style="display: none;"></iframe></div>
+                             <span id="ctl00_ContentPlaceHolder1_lblErrorTxt" class="JERF_texto1" style="color: red;"></span>
+                         </td>
+                     </tr>
+                 </tbody>
+             </table>
+         </div>
+     </div>
+ 
+	</div>
+
+            </div>
+        </div>
+    
 </div>
