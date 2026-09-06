@@ -51,9 +51,12 @@ fun TregistroDashboard(
     // 👈 AGREGA ESTA LÍNEA EXACTA EN LA PARTE SUPERIOR DE VARIABLES (Línea 40-50 aprox)
     var regimenPensionarioSeleccionado by remember { mutableStateOf("ONP") }
 
-    // 👈 AGREGA ESTA LÍNEA EXACTA AQUÍ (Línea 51 aprox)
+    var apellidoPaterno by remember { mutableStateOf("") }
+    var apellidoMaterno by remember { mutableStateOf("") }
+    var primerNombre by remember { mutableStateOf("") }
+    var segundoNombre by remember { mutableStateOf("") }
     var activarBotSbs by remember { mutableStateOf(false) }
-    // Invocación segura de la Ventana 5 (Bot Scraper asistido)
+
 
 
 
@@ -156,7 +159,11 @@ fun TregistroDashboard(
     // ==========================================
     // 3. DIÁLOGO FORMULARIO AGREGAR TRABAJADOR (PARTE 1)
     // ==========================================
+    // =====================================================================
+    // BLOQUE 5: FORMULARIO DE REGISTRO CON AUDITORÍA VISUAL DEL BOT SBS
+    // =====================================================================
     if (mostrarModalAgregar) {
+        // Variables locales para controlar los menús desplegables de abajo
         var mostrarContratos by remember { mutableStateOf(false) }
         val opcionesContrato = listOf("POR NECES DEL MERCADO", "PLAZO INDETERMINADO", "INTERMITENTE", "TEMPORAL")
 
@@ -213,9 +220,28 @@ fun TregistroDashboard(
             title = { Text("Registrar Trabajador", fontWeight = FontWeight.Bold) },
             text = {
                 Column(
-                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // 👈 1. EL BOT SE DIBUJA AQUÍ: Es lo primero dentro de la Column del formulario
+                    if (activarBotSbs && dni.length == 8) {
+                        BotScraperSBS(
+                            dni = dni,
+                            apellidoPaterno = apellidoPaterno,
+                            apellidoMaterno = apellidoMaterno,
+                            primerNombre = primerNombre,
+                            onResultadoEncontrado = { afpAsignada ->
+                                regimenPensionarioSeleccionado = afpAsignada
+                                activarBotSbs = false
+                                android.widget.Toast.makeText(contexto, "Sincronizado: $afpAsignada", android.widget.Toast.LENGTH_SHORT).show()
+                            },
+                            onDismissRequest = { activarBotSbs = false }
+                        )
+                    }
+
+                    // 👈 2. AQUÍ CONECTAMOS EL CAMPO DNI INMEDIATAMENTE DEBAJO DEL BOT
                     OutlinedTextField(
                         value = dni,
                         onValueChange = { input ->
@@ -226,10 +252,13 @@ fun TregistroDashboard(
                                     cargandoApi = true
                                     scopeParaCorrutinas.launch(Dispatchers.IO) {
                                         try {
-                                            val nombreEncontrado = com.example.asisnet_contable.PostgresDriver.consultarDniApiPeru(input)
+                                            val datosApi = com.example.asisnet_contable.PostgresDriver.consultarDniApiPeruDesglosado(input)
                                             withContext(Dispatchers.Main) {
-                                                if (nombreEncontrado != null) {
-                                                    nombres = nombreEncontrado
+                                                if (datosApi != null) {
+                                                    nombres = datosApi["completo"] ?: ""
+                                                    apellidoPaterno = datosApi["paterno"] ?: ""
+                                                    apellidoMaterno = datosApi["materno"] ?: ""
+                                                    primerNombre = datosApi["nombres"] ?: ""
                                                     activarBotSbs = true
                                                 }
                                             }
@@ -294,6 +323,9 @@ fun TregistroDashboard(
                     if (activarBotSbs && dni.length == 8) {
                         BotScraperSBS(
                             dni = dni,
+                            apellidoPaterno = apellidoPaterno,
+                            apellidoMaterno = apellidoMaterno,
+                            primerNombre = primerNombre,
                             onResultadoEncontrado = { afpAsignada ->
                                 regimenPensionarioSeleccionado = afpAsignada
                                 activarBotSbs = false
@@ -302,6 +334,11 @@ fun TregistroDashboard(
                             onDismissRequest = { activarBotSbs = false }
                         )
                     }
+
+                    // Tus campos normales van abajo...
+                    OutlinedTextField(value = dni, onValueChange = { /* ... */ }, label = { Text("DNI") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = nombres, onValueChange = { nombres = it }, label = { Text("Nombres Completos") }, modifier = Modifier.fillMaxWidth())
+
                 }
             }
         )
@@ -353,64 +390,78 @@ fun TregistroDashboard(
     }
 
 }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun BotScraperSBS(
-        dni: String,
-        onResultadoEncontrado: (String) -> Unit,
-        onDismissRequest: () -> Unit
-    ) {
-        androidx.compose.ui.viewinterop.AndroidView(
-            factory = { ctx ->
-                android.webkit.WebView(ctx).apply {
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36"
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BotScraperSBS(
+    dni: String,
+    apellidoPaterno: String,
+    apellidoMaterno: String,
+    primerNombre: String,
+    onResultadoEncontrado: (String) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    androidx.compose.ui.viewinterop.AndroidView(
+        factory = { ctx ->
+            android.webkit.WebView(ctx).apply {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36"
 
-                    addJavascriptInterface(object {
-                        @android.webkit.JavascriptInterface
-                        fun enviarAfp(htmlCuerpo: String) {
-                            val afpDetectada = when {
-                                htmlCuerpo.contains("PRIMA", ignoreCase = true) -> "AFP PRIMA"
-                                htmlCuerpo.contains("INTEGRA", ignoreCase = true) -> "AFP INTEGRA"
-                                // REEMPLAZA la línea 376 para que se vea así:
-                                htmlCuerpo.contains("PROFUTURO", ignoreCase = true) -> "AFP PROFUTURO"
-
-                                htmlCuerpo.contains("HABITAT", ignoreCase = true) -> "AFP HABITAT"
-                                else -> "ONP"
-                            }
-                            post { onResultadoEncontrado(afpDetectada) }
+                addJavascriptInterface(object {
+                    @android.webkit.JavascriptInterface
+                    fun enviarAfp(htmlCuerpo: String) {
+                        val afpDetectada = when {
+                            htmlCuerpo.contains("PRIMA", ignoreCase = true) -> "AFP PRIMA"
+                            htmlCuerpo.contains("INTEGRA", ignoreCase = true) -> "AFP INTEGRA"
+                            htmlCuerpo.contains("PROFUTURO", ignoreCase = true) -> "AFP PROFUTURO"
+                            htmlCuerpo.contains("HABITAT", ignoreCase = true) -> "AFP HABITAT"
+                            else -> "ONP"
                         }
-                    }, "AndroidBot")
+                        post { onResultadoEncontrado(afpDetectada) }
+                    }
+                }, "AndroidBot")
 
-                    webViewClient = object : android.webkit.WebViewClient() {
-                        var ejecucionAutomatica = true
+                webViewClient = object : android.webkit.WebViewClient() {
+                    var ejecucionAutomatica = true
 
-                        override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-                            if (ejecucionAutomatica) {
-                                val scriptBot = """
+                    override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        if (ejecucionAutomatica) {
+                            val scriptBot = """
                                 (function() {
                                     var comboDoc = document.getElementById('ctl00_ContentPlaceHolder1_cboTipoDoc');
                                     if(comboDoc) comboDoc.value = '00';
+                                    
                                     var inputDni = document.getElementById('ctl00_ContentPlaceHolder1_txtNumeroDoc');
                                     if(inputDni) inputDni.value = '$dni';
+                                    
+                                    var inputPat = document.getElementById('ctl00_ContentPlaceHolder1_txtApePaterno');
+                                    if(inputPat) inputPat.value = '$apellidoPaterno';
+                                    
+                                    var inputMat = document.getElementById('ctl00_ContentPlaceHolder1_txtApeMaterno');
+                                    if(inputMat) inputMat.value = '$apellidoMaterno';
+                                    
+                                    var inputNom = document.getElementById('ctl00_ContentPlaceHolder1_txtPrimerNombre');
+                                    if(inputNom) inputNom.value = '$primerNombre';
+                                    
                                     var btnBuscar = document.getElementById('ctl00_ContentPlaceHolder1_btnBuscar');
                                     if(btnBuscar) btnBuscar.click();
                                 })();
                             """.trimIndent()
-                                evaluateJavascript(scriptBot, null)
-                                ejecucionAutomatica = false
-                            } else {
-                                val scriptLectura = "window.AndroidBot.enviarAfp(document.body.innerText);"
-                                handler.postDelayed({ evaluateJavascript(scriptLectura, null) }, 1500)
-                            }
+                            evaluateJavascript(scriptBot, null)
+                            ejecucionAutomatica = false
+                        } else {
+                            val scriptLectura = "window.AndroidBot.enviarAfp(document.body.innerText);"
+                            handler.postDelayed({ evaluateJavascript(scriptLectura, null) }, 1500)
                         }
                     }
-                    loadUrl("https://sbs.gob.pe")
                 }
-            },
-            modifier = Modifier.size(0.dp)
+                loadUrl("https://sbs.gob.pe")
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
         )
     }
 
