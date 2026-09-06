@@ -1,154 +1,240 @@
-<div id="ctl00_ContentPlaceHolder1_pnlBusqueda" style="width:782px;">
-	
-        <div style="padding: 15px;">
-            <div class="caja_contenido" style="width: 575px">
-                <div class="caja_titulo" style="height: 35px; width: 574px;">
-                    <span class="JERF_subtitulo1">
-                        <b style="font-weight: bold;">BÚSQUEDA AFILIADO EN EL SISTEMA PRIVADO DE PENSIONES
-                        </b>
-                    </span>
-                </div>
-               
+<body>
 
-     <div id="ctl00_ContentPlaceHolder1_FormBusqueda">
-		
-     <div style="padding: 15px; width: 519px;">
-     <div id="cphContent_form" class="caja_subcontenido">
-         <table border="0" cellpadding="0" cellspacing="0" width="497px">
-             <tbody><tr>
-                 <td colspan="2" class="JERF_texto2" style="color: red; text-align: left">Aviso Importante: Ingrese datos sin considerar tildes.<br><br>
-                   
-                     <hr>
-                 </td>
-             </tr>
 
-              <tr style="text-align: center">
-                   <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Tipo de Documento de Identidad</td>
-               <td height="25px" style="text-align: left">
-                     <select name="ctl00$ContentPlaceHolder1$cboTipoDoc" id="ctl00_ContentPlaceHolder1_cboTipoDoc" class="JERF_texto1 " style="padding-top: 6px; padding-bottom: 6px; border-radius: 4px; margin-top: 12px;">
-			<option value="00">DNI/Lib.Electoral</option>
-			<option value="01">Carné Extranj.</option>
-			<option value="02">Carné Mil/Pol</option>
-			<option value="03">Carné Min.trab</option>
-			<option value="04">Pasaporte</option>
+    <form name="aspnetForm" method="post" action="./Afil_Consulta.aspx" id="aspnetForm">
+<div>
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJNjUwMDExMTA2D2QWAmYPZBYCAgMPZBYCAgEPZBYGAgEPDxYCHgdWaXNpYmxlaGQWBAIBD2QWDAIBDxBkZBYBZmQCBw8PFgIeBFRleHQFCDcwMzg0NjE0ZGQCDw8PFgIfAQUGcXVpc3BlZGQCFw8PFgIfAQUGc3VhcmV6ZGQCHw8PFgIfAQUGYnJheWFuZGQCJw8PFgIfAQUGamFyb2xsZGQCAw9kFgICAQ8PFgIfAWVkZAIDDw8WAh8AZ2QWBAIBDw8WAh8AZ2QWEAIBDw8WAh8BBSVJbmZvcm1hY2nDs24gYWwgOiAwNS8wOS8yMDI2IDIzOjQ0OjI4ZGQCAw8PFgIfAQUKMjEvMDYvMjAxNGRkAgUPDxYCHwEFB0hhYml0YXRkZAIHDw8WAh8BBQwzMzI5MzFCUVNTUjZkZAIJDw8WAh8BBQhBZmlsaWFkb2RkAgsPDxYCHwEFBzA1LzIwMjNkZAINDw8WAh8BBTtBQ1RJVk8sIHNlZ8O6biBsb3MgZGF0b3MgcXVlIGFwYXJlY2VuIGVuIGxhIHBhcnRlIHN1cGVyaW9yLmRkAg8PDxYCHwEFkgVEZSBhY3VlcmRvIGEgbGEgaW5mb3JtYWNpw7NuIHByb3BvcmNpb25hZGEgcG9yIGxhIEFGUCwgZHVyYW50ZSBsb3Mgw7psdGltb3Mgc2VpcyAoNikgbWVzZXMgZWwgYWZpbGlhZG8gbm8gcmVnaXN0cmEgYXBvcnRlcyBvYmxpZ2F0b3Jpb3MsIG1vdGl2byBwb3IgZWwgY3VhbCBzaSBlbCBhZmlsaWFkbyB0aWVuZSBsYSBjb25kaWNpw7NuIGRlIHRyYWJhamFkb3IgZGVwZW5kaWVudGUgeSBsZSBoYW4gZXN0YWRvIGVmZWN0dWFuZG8gbGFzIHJldGVuY2lvbmVzIGNvcnJlc3BvbmRpZW50ZXMgbywgc2kgdGllbmUgbGEgY29uZGljacOzbiBkZSBpbmRlcGVuZGllbnRlIHkgaGEgdmVuaWRvIHBhZ2FuZG8gc3VzIGFwb3J0ZXMgb2JsaWdhdG9yaW9zLCBzZXLDrWEgY29udmVuaWVudGUgc2UgcG9uZ2EgZW4gY29udGFjdG8gY29uIGxhIEFGUCBwYXJhIGRldGVybWluYXIgbGEgc2l0dWFjacOzbiBkZSBsb3MgcmVmZXJpZG9zIGFwb3J0ZXMuPGJyPjxicj5SZWN1ZXJkZSBxdWUgbG9zIGFwb3J0ZXMgYWNyZWRpdGFkb3MgcmVzdWx0YW4gbmVjZXNhcmlvcyBwYXJhIGVmZWN0b3MgZGUgbGEgZXZhbHVhY2nDs24gZGUgbGEgY29iZXJ0dXJhIGRlbCBzZWd1cm8gcHJldmlzaW9uYWwgYW50ZSB1bmEgY29udGluZ2VuY2lhIGRlIGludmFsaWRleiBvIGZhbGxlY2ltaWVudG8uZGQCAw8PFgIfAGdkZAIFD2QWAgIBD2QWAgI/DxBkZBYBZmRkmJXNpb058i5Hcc43bs73WNGSTcEIm7ong0g8afQqKCs=">
+</div>
 
-		</select>
-                      <span style="display:inline-block;height:25px;color: red">*</span>
-                    <br>
-                     &nbsp;
-                   <span id="ctl00_ContentPlaceHolder1_CampoObligatorio1" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar un documento de identidad</span>
-                 </td>
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/ReporteSituacionPrevisional/WebResource.axd?d=_tiIPfY16VqrfcbvsbdI9eV_NP1ca5Dhvbf2AyMKl5Sw9HBgkChfwyO_0KtKkCZqx70dOT03kwZW6wI-JIRspCj4SF-KQk_IJanVl13CNcQ1&amp;t=638901361900000000" type="text/javascript"></script>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="B976FAEF">
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAPNhH+ovxhG3cY5Wwoj5U0ntynDXHbH735+Qey5FxAvAj8jzSvVBlyk5hFsDOQMxCxqdbzkh8Z26aICvMoZl4jrDFHEdR5qPomvkQmt8F9qpA==">
+</div>
+        <div>
             
-            </tr>
+    <script type="text/javascript">
 
-             <tr>
-                 <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">N° de Documento</td>
-                
-           
-                  <td height="25px" style="text-align: left">
-                     <input name="ctl00$ContentPlaceHolder1$txtNumeroDoc" type="text" maxlength="25" id="ctl00_ContentPlaceHolder1_txtNumeroDoc" style="padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
-                       <span style="display:inline-block;height:25px;color: red">*</span>
- <br>
-                     <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator16" class="Mensaje_Error_Net" style="color:Red;display:none;">Caracteres Inválido</span>
-                     <span id="ctl00_ContentPlaceHolder1_Validator_txtNumeroDoc2" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar un documento de identidad</span>
+        function Imprimir() {
+            window.print();
+            //$("#btnTerminar").fadeIn();
+        }
+        function btnImprimir_onclick() {
 
-                 </td>
-             </tr>
+        }
 
-             <tr>
-    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Apellido Paterno</td>
-    <td height="25px" style="text-align: left">
-        <input name="ctl00$ContentPlaceHolder1$txtAp_pat" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtAp_pat" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
-        <span style="display:inline-block;height:25px;color: red">*</span>
-        <br>
-        <span id="ctl00_ContentPlaceHolder1_RequiredFieldValidator2" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar el apellido paterno</span>
-        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator4" class="Mensaje_Error_Net" style="color:Red;display:none;">El apellido paterno sólo debe tener letras</span>
-    </td>
-</tr>
-<tr>
-    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Apellido Materno</td>
-    <td height="25px" style="text-align: left">
-        <input name="ctl00$ContentPlaceHolder1$txtAp_mat" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtAp_mat" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
-        <span style="display:inline-block;height:25px;color: red">*</span>
-        <br>
-        <span id="ctl00_ContentPlaceHolder1_RequiredFieldValidator3" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar el apellido materno</span>
-        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator5" class="Mensaje_Error_Net" style="color:Red;display:none;">El apellido materno sólo debe tener letras</span>
-    </td>
-</tr>
+    </script>
 
-<tr>
-    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Primer Nombre</td>
-    <td height="25px" style="text-align: left">
-        <input name="ctl00$ContentPlaceHolder1$txtPri_nom" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtPri_nom" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
-        <span style="display:inline-block;height:25px;color: red">*</span>
-        <br>
-        <span id="ctl00_ContentPlaceHolder1_RequiredFieldValidator4" class="Mensaje_Error_Net" style="color:Red;display:none;">Debe ingresar el primer nombre</span>
+    
+    <script>
+        DoLoad();
+    </script>
 
-        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator6" class="Mensaje_Error_Net" style="color:Red;display:none;">El primer nombre sólo debe tener letras</span>
-       
-    </td>
-</tr>
-<tr>
-    <td height="25px" class="JERF_subtitulo3" style="padding-left: 5px; text-align: left;">Segundo Nombre</td>
-    <td height="25px" style="text-align: left">
-        <input name="ctl00$ContentPlaceHolder1$txtSeg_nom" type="text" maxlength="100" id="ctl00_ContentPlaceHolder1_txtSeg_nom" style="width:140px;padding-top: 6px; padding-bottom: 6px; border-radius: 4px;">
-               
-        <span id="ctl00_ContentPlaceHolder1_RegularExpressionValidator7" class="Mensaje_Error_Net" style="color:Red;display:none;">El segundo nombre sólo debe tener letras</span>
-       
-    </td>
-</tr>
-
-              
-
-         </tbody></table>
-
-         <table>
-            <tbody><tr>
-                <td colspan="3" class="JERF_texto2" style="padding-left: 5PX; text-align: justify">Le informamos que los datos personales que proporcione serán tratados conforme a la Ley N° 29733 y su reglamento. Si desea conocer más sobre la ley de protección de datos personales ingrese <a href="http://www.sbs.gob.pe/principal/categoria/ley-de-proteccion-de-datos-personales/4334/c-4334" target="_blank"><u>aquí</u>.</a>
+    <div id="ctl00_ContentPlaceHolder1_pnlConfirmar" style="height:598px;width:782px;">
+	
+        <table border="0" cellspacing="4" cellpadding="4">
+            <tbody><tr class="APLI_titulo">
+                <td colspan="4" style="border-bottom: 1px solid gray; width: 767px; height: 24px;">
+                    <div align="left" style="width: 770px">
+                        <strong>REPORTE DE SITUACIÓN PREVISIONAL EN EL SISTEMA PRIVADO DE PENSIONES
+                        </strong><b>:</b>
+                    </div>
                 </td>
             </tr>
-            <tr>
-                <td colspan="3" style="text-align: right"></td>
-            </tr>
-
-             <tr>
-                <td colspan="2" class="JERF_texto2" style="color: red; text-align: left">(*) Datos obligatorios para la consulta.<br>                   
-                 </td>
-
-             </tr>
-
         </tbody></table>
-
-
-     </div>
- </div>
-
-	</div>
-
-  <div id="ctl00_ContentPlaceHolder1_pnlcaptcha">
+        <div id="ctl00_ContentPlaceHolder1_pnlImprimesup">
 		
-     <div style="width: 500px; height: 20px; text-align: center;">
-         <input type="submit" name="ctl00$ContentPlaceHolder1$btnBuscar" value="  Buscar  " onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$btnBuscar&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ContentPlaceHolder1_btnBuscar" class=" JERF_texto1" style="color: White; background-color: #2174E5;
-             border-color: #2174E5; height: 30px; width: 100px; border-radius: .21428571em;">&nbsp;&nbsp;                        
-     </div>
-     <div style="padding: 15px">
-         <div>
-             <table style="width: 534px; height: 65px;">
-                 <tbody>
-                     <tr>
-                         <td colspan="2" style="text-align: center;">
-                             <div id="divCaptcha" class="g-recaptcha" data-sitekey="6LdR-KUZAAAAANbQ4LKiFpqcLzkNnJ_UanjRRLg0" data-callback="DoPost" data-size="invisible"><div class="grecaptcha-badge" data-style="bottomright" style="width: 256px; height: 60px; display: block; transition: right 0.3s; position: fixed; bottom: 14px; right: -186px; box-shadow: gray 0px 0px 5px; border-radius: 2px; overflow: hidden;"><div class="grecaptcha-logo"><iframe title="reCAPTCHA" width="256" height="60" role="presentation" name="a-8y5t0kk8dpwp" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" src="https://www.google.com/recaptcha/api2/anchor?ar=1&amp;k=6LdR-KUZAAAAANbQ4LKiFpqcLzkNnJ_UanjRRLg0&amp;co=aHR0cHM6Ly9zZXJ2aWNpb3Muc2JzLmdvYi5wZTo0NDM.&amp;hl=es-419&amp;v=8x-4t2pegToiW8KmThtO4AQt&amp;size=invisible&amp;anchor-ms=20000&amp;execute-ms=30000&amp;cb=4wsbois5ajmb"></iframe></div><div class="grecaptcha-error"></div><textarea id="g-recaptcha-response" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid rgb(193, 193, 193); margin: 10px 25px; padding: 0px; resize: none; display: none;"></textarea></div><iframe style="display: none;"></iframe></div>
-                             <span id="ctl00_ContentPlaceHolder1_lblErrorTxt" class="JERF_texto1" style="color: red;"></span>
-                         </td>
-                     </tr>
-                 </tbody>
-             </table>
-         </div>
-     </div>
- 
+            <table width="100%" border="0" cellspacing="2" cellpadding="0">
+                <tbody><tr class="JERF_texto2">
+                    <td style="text-align: left; color: #2174e5">
+                        <b>Información al:</b>
+                    </td>
+                    <td style="height: 19px; text-align: right; width: 496px;"><b>
+                        <span id="ctl00_ContentPlaceHolder1_lblFechaReg">Información al : 05/09/2026 23:44:28</span></b></td>
+                </tr>
+                <tr class="JERF_texto2">
+                    <td style="height: 19px; text-align: left; width: 496px; color: #2174e5"><b>Estimado usuario:
+                    </b></td>
+                </tr>
+                <tr class="JERF_texto2">
+                    <td style="height: 19px; text-align: left; width: 496px; color: #2174e5" colspan="2"><b>Como resultado de la consulta realizada a través del Portal Web, se ha determinado lo siguiente:
+                    </b></td>
+                </tr>
+               
+               
+               
+            </tbody></table>
+
+            <table width="100%" border="0" cellspacing="2" cellpadding="0" style="margin-right: 0px">
+                <tbody><tr class="JERF_texto2">
+                    <td style="text-align: left; color: #2174e5"><b>Se encuentra afiliado(a) al SPP desde el </b></td>
+                    <td align="right">
+                        <span id="ctl00_ContentPlaceHolder1_lblFec_ing">21/06/2014</span></td>
+                </tr>
+                <tr class="JERF_texto2">
+                    <td style="text-align: left; color: #2174e5"><b>Actualmente se encuentra afiliado(a) a </b></td>
+                    <td align="right">
+                        <span id="ctl00_ContentPlaceHolder1_lblAfp_act">Habitat</span></td>
+                </tr>
+                
+                
+                
+               
+                <tr class="JERF_texto2">
+                    <td class="" style="text-align: left; color: #2174e5"><b>Su Código de Identificación del SPP es </b></td>
+                    <td align="right">
+                        <span id="ctl00_ContentPlaceHolder1_lblCod_afi">332931BQSSR6</span></td>
+                </tr>
+                <tr class="JERF_texto2">
+                    <td style="text-align: left; color: #2174e5"><b>Su situación actual es</b> </td>
+                    <td align="right">
+                        <span id="ctl00_ContentPlaceHolder1_lblSituacion">Afiliado</span></td>
+                </tr>
+                
+                
+                
+                <tr class="JERF_texto2">
+                    <td style="text-align: left; height: 20px; width: 43%; color: #2174e5"><b>La fecha de devengue de su último aporte es </b></td>
+                    <td align="right" style="height: 20px">
+                        <span id="ctl00_ContentPlaceHolder1_lblFec_dev">05/2023</span></td>
+                </tr>
+
+                
+
+                
+                
+                
+
+                
+
+                <tr>
+                    <td colspan="9" style="height: 24px">
+                        <div style="border: 1px  solid gray; width: 772px; padding: 3px;">
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                <tbody><tr class="APLI_txtContenido">
+                                    <td colspan="9" class="APLI_titulo" align="center" style="color: #2174E5; text-align: center; height: 24px; width: 775px;">M U Y &nbsp;&nbsp; I M P O R T A N T E</td>
+                                </tr>
+                                <tr class="APLI_txtContenido">
+                                    <td colspan="9" class="JERF_texto2" style="text-align: left; width: 775px; text-decoration: underline; color: #2174e5">Situación del Afiliado </td>
+                                </tr>
+                                <tr class="APLI_txtContenido">
+                                    <td colspan="9" class="JERF_texto2" align="justify" style="width: 775px">
+                                        <div style="text-align: justify;">
+                                            <span id="ctl00_ContentPlaceHolder1_TxtBoxSit_Det">ACTIVO, según los datos que aparecen en la parte superior.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="APLI_txtContenido">
+                                    <td style="width: 775px">&nbsp;</td>
+                                </tr>
+                                <tr class="APLI_txtContenido">
+                                    <td colspan="9" class="JERF_texto2" style="text-align: left; text-decoration: underline; color: #2174e5; width: 775px;">Aportes Obligatorios </td>
+                                </tr>
+                                <tr class="APLI_txtContenido">
+                                    <td colspan="9" class="JERF_texto2" align="justify" style="width: 775px">
+                                        <div style="text-align: justify;">
+                                            <span id="ctl00_ContentPlaceHolder1_TxtBoxApor_Obl">De acuerdo a la información proporcionada por la AFP, durante los últimos seis (6) meses el afiliado no registra aportes obligatorios, motivo por el cual si el afiliado tiene la condición de trabajador dependiente y le han estado efectuando las retenciones correspondientes o, si tiene la condición de independiente y ha venido pagando sus aportes obligatorios, sería conveniente se ponga en contacto con la AFP para determinar la situación de los referidos aportes.<br><br>Recuerde que los aportes acreditados resultan necesarios para efectos de la evaluación de la cobertura del seguro previsional ante una contingencia de invalidez o fallecimiento.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody></table>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="APLI_txtContenido" style="vertical-align: middle">
+                    <td class="" colspan="9" style="color: #F00; text-align: justify">En caso tuviera dudas con relación al presente documento, sirvase contactar a la Superintendencia al teléfono gratuito a nivel nacional : 0800-10840.
+                    </td>
+                </tr>
+            </tbody></table>
+        
+	</div>
+        <div id="ctl00_ContentPlaceHolder1_pnlImprimeinf">
+		
+            <div id="ctl00_ContentPlaceHolder1_pnlCorredorImprime">
+			
+                
+                    <div id="DivContacto" class="visible-only-screen">
+                        <table style="width: 779px; height: 90px">
+                            <tbody><tr class="APLI_txtContenido">
+                                <td>
+                                    <input type="hidden" name="numdoc" value=""></td>
+                            </tr>
+                            <tr class="APLI_txtContenido">
+                                <td class="APLI_enlace" style="text-align: center; width: 520px">
+                                    <div style="display: inline; vertical-align: top">
+                                        <u>Si usted desea que la AFP se ponga en contacto con usted, hacer click</u>
+                                        <input type="submit" name="ctl00$ContentPlaceHolder1$btnFormulario" value="  Aquí  " onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$btnFormulario&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ContentPlaceHolder1_btnFormulario" class="APLI_boton" style="width: 60px; vertical-align: middle; color: White; background-color: #2174E5; border-color: #2174E5; border-radius: .21428571em;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="APLI_txtContenido">
+                                <td>&nbsp;</td>
+                            </tr>
+
+                        </tbody></table>
+                    </div>
+                
+                <table border="0" cellspacing="2" cellpadding="0">
+                    <tbody><tr class="APLI_txtContenido">
+                        <td colspan="2" style="width: 775px; text-align: right">
+                            <input type="submit" name="ctl00$ContentPlaceHolder1$btnOtro_Registro" value="  Consultar otro registro  " onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$btnOtro_Registro&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ContentPlaceHolder1_btnOtro_Registro" class="APLI_boton" style="color: White; background-color: #2174E5; border-color: #2174E5; border-radius: .21428571em;">
+                            &nbsp;&nbsp;
+                                                 <input id="btnImprimir" type="button" value="  Imprimir  " class="APLI_boton" onclick="Imprimir()" style="color: White; background-color: #2174E5; border-color: #2174E5; border-radius: .21428571em;">&nbsp;&nbsp; 
+
+                        </td>
+                    </tr>
+                </tbody></table>
+            
+		</div>
+        
 	</div>
 
-            </div>
-        </div>
     
 </div>
+
+
+    
+
+
+
+
+ 
+                        
+              
+             
+                                
+                              
+                           
+                            
+
+
+    
+
+
+        </div></form>
+    
+
+
+
+</body>
