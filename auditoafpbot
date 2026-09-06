@@ -109,25 +109,41 @@ for emp in lista_empresas:
     options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
     options.add_experimental_option("useAutomationExtension", False)
 
-    # 🔒 IMPRESIÓN EXTREMA SINCRO: Forzar el guardado automático de PDFs en D:\afpnet
+    # 🔒 CONFIGURACIÓN DE PERFIL INTEGRAL EN EL DISCO D (Reemplaza al Modo Invitado)
+    # Creamos un perfil limpio y aislado en el Disco D para no mezclar tus cuentas de Google
+    ruta_perfil_aislado = r"D:\PerfilTemporalChrome"
+    if not os.path.exists(ruta_perfil_aislado):
+        os.makedirs(ruta_perfil_aislado)
+    options.add_argument(f"--user-data-dir={ruta_perfil_aislado}")
+
+    # 🔒 IMPRESIÓN EXTREMA SINCRO: Forzar el guardado automático de PDFs en D:\afpnet sin ventanas
     options.add_experimental_option("prefs", {
         "credentials_enable_service": False,
         "profile.password_manager_enabled": False,
         "profile.default_content_setting_values.notifications": 2,
         "autofill.profile_enabled": False,
         "autofill.credit_card_enabled": False,
-        # Configuración nativa de la impresora virtual de PDF de Chrome
-        "savefile.default_directory": CARPETA_PLANILLA,  # Envía el PDF a D:\afpnet
+        # Permite descargar varios archivos en bucle de forma automática sin preguntar
+        "profile.default_content_setting_values.automatic_downloads": 1,
+        # Configuración nativa de la impresora virtual y descargas de Chrome
+        "savefile.default_directory": CARPETA_PLANILLA,
         "download.default_directory": CARPETA_PLANILLA,
-        "download.prompt_for_download": False,  # Desactiva alertas de descarga
-        "download.directory_upgrade": True,  # Fuerza a Chrome a usar la ruta definida sin preguntar
-        "plugins.always_open_pdf_externally": True,
-        "printing.print_preview_sticky_settings.appState": json.dumps(print_settings),  # 👈 fuerza destino "Guardar como PDF"
+        "download.prompt_for_download": False,  # Bloquea definitivamente el cuadro de diálogo "Guardar como"
+        "download.directory_upgrade": True,
+        # 🔑 SOLUCIÓN: Cambiado a False para evitar que se fuercen acciones externas al descargar el PDF
+        "plugins.always_open_pdf_externally": False,
+        # Bloquea que el PDF se abra solo en la pantalla tras descargarse
+        "download.open_pdf_in_system_reader": False,
+        "savefile.type": 0,                      # Fuerza a guardar el archivo directamente como binario/PDF
+        # 🔑 SOLUCIÓN: Se eliminó la línea "download.extensions_to_open" que obligaba a abrir los PDFs
+        "printing.print_preview_sticky_settings.appState": json.dumps(print_settings),
     })
 
-    # 🧬 BANDERAS DE MODO INVITADO Y KIOSKO: Navegación limpia y descargas automáticas
-    options.add_argument("--guest")  # 👈 ACTIVA EL MODO INVITADO (Evita vinculación con Gmail)
-    options.add_argument("--kiosk-printing")  # 🛠️ CAPTURA EL POPUP DE IMPRESIÓN Y LO GUARDA EN SILENCIO
+
+
+    # 🧬 BANDERAS DE KIOSKO: Automatización de descargas e impresión desatendida sin modo invitado
+    options.add_argument("--kiosk-printing")     # 🛠️ Ejecuta la impresión en segundo plano instantáneamente
+    options.add_argument("--disable-popup-blocking")
     options.add_argument("--disable-gpu")
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--disable-ssl-errors")
