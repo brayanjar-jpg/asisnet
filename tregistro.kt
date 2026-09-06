@@ -2,13 +2,9 @@ package com.example.asisnet_contable
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,210 +13,405 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TregistroDashboard(
+    rucEmpresa: String,
     listaTrabajadores: List<com.example.asisnet_contable.PostgresDriver.EmpleadoLaboral>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onTrabajadorAgregado: () -> Unit
 ) {
-    var trabajadorSeleccionado by remember { mutableStateOf<com.example.asisnet_contable.PostgresDriver.EmpleadoLaboral?>(null) }
+    val scopeParaCorrutinas = rememberCoroutineScope()
+    val contexto = androidx.compose.ui.platform.LocalContext.current
+
+    var mostrarModalAgregar by remember { mutableStateOf(false) }
     var mostrarModalDetalle by remember { mutableStateOf(false) }
+    var mostrarSelectorFecha by remember { mutableStateOf(false) }
+
+    var trabajadorSeleccionado by remember { mutableStateOf<com.example.asisnet_contable.PostgresDriver.EmpleadoLaboral?>(null) }
+    val datePickerState = rememberDatePickerState()
+
+    var dni by remember { mutableStateOf("") }
+    var nombres by remember { mutableStateOf("") }
+    var fechaNacimiento by remember { mutableStateOf("") }
+    var cargo by remember { mutableStateOf("SECRETARIA") }
+    var sueldoStr by remember { mutableStateOf("1025.00") }
+    var contrato by remember { mutableStateOf("POR NECES DEL MERCADO") }
+
+    var errorDni by remember { mutableStateOf<String?>(null) }
+    var cargandoApi by remember { mutableStateOf(false) }
+    // 👈 AGREGA ESTA LÍNEA EXACTA EN LA PARTE SUPERIOR DE VARIABLES (Línea 40-50 aprox)
+    var regimenPensionarioSeleccionado by remember { mutableStateOf("ONP") }
+
+    // 👈 AGREGA ESTA LÍNEA EXACTA AQUÍ (Línea 51 aprox)
+    var activarBotSbs by remember { mutableStateOf(false) }
+    // Invocación segura de la Ventana 5 (Bot Scraper asistido)
+
+
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Dashboard T-Registro", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Registro de Trabajadores",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
+        },
+        floatingActionButton = {
+            Box(modifier = Modifier.padding(bottom = 60.dp)) {
+                FloatingActionButton(
+                    onClick = { mostrarModalAgregar = true },
+                    containerColor = Color(0xFF6750A4),
+                    contentColor = Color.White
+                ) {
+                    Text("+", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                }
+            }
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Control de Trabajadores Activos",
-                style = MaterialTheme.typography.headlineMedium
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            if (listaTrabajadores.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No se encontraron trabajadores registrados.",
-                        color = Color.Gray,
-                        fontSize = 16.sp
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(listaTrabajadores.size) { index ->
-                        val empleado = listaTrabajadores[index]
-                        val esActivo = empleado.estadoSunat.contains("Activo", ignoreCase = true)
-                        val colorEstado = if (esActivo) Color(0xFF00B27E) else Color.Gray
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    trabajadorSeleccionado = empleado
-                                    mostrarModalDetalle = true
-                                },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                listaTrabajadores.forEach { empleado ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                trabajadorSeleccionado = empleado
+                                mostrarModalDetalle = true
+                            },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = empleado.nombresCompletos,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Surface(
-                                        color = colorEstado.copy(alpha = 0.15f),
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Text(
-                                            text = empleado.estadoSunat,
-                                            color = colorEstado,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Bottom
-                                ) {
-                                    Column {
-                                        Text(text = "DNI: ${empleado.dni}", fontSize = 14.sp, color = Color.Gray)
-                                        Text(text = "Fec. Nac.: ${empleado.fechaNacimiento}", fontSize = 14.sp, color = Color.Gray)
-                                        Text(text = "Sexo: ${empleado.sexo}", fontSize = 14.sp, color = Color.Gray)
-                                    }
-
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        IconButton(
-                                            onClick = {
-                                                trabajadorSeleccionado = empleado
-                                                mostrarModalDetalle = true
-                                            },
-                                            modifier = Modifier.size(36.dp)
-                                        ) {
-                                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar", tint = Color(0xFF6750A4))
-                                        }
-                                        IconButton(onClick = { }, modifier = Modifier.size(36.dp)) {
-                                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
-                                        }
-                                    }
-                                }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = empleado.nombresCompletos, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(text = "DNI: ${empleado.dni}", color = Color.Gray, fontSize = 14.sp)
+                                Text(text = "Fec. Nac.: ${empleado.fechaNacimiento}", color = Color.Gray, fontSize = 14.sp)
+                                Text(text = "Cargo: ${empleado.ocupacion}", color = Color.Gray, fontSize = 14.sp)
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = Color(0xFFE0F7FA),
+                                modifier = Modifier.padding(start = 8.dp)
+                            ) {
+                                Text(
+                                    text = empleado.estadoSunat,
+                                    color = Color(0xFF006064),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             Button(
                 onClick = onBackClick,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(12.dp)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A3780)),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Volver al Menú", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text("Volver al Menú", color = Color.White, fontSize = 16.sp)
             }
         }
     }
+    // ==========================================
+    // 3. DIÁLOGO FORMULARIO AGREGAR TRABAJADOR (PARTE 1)
+    // ==========================================
+    if (mostrarModalAgregar) {
+        var mostrarContratos by remember { mutableStateOf(false) }
+        val opcionesContrato = listOf("POR NECES DEL MERCADO", "PLAZO INDETERMINADO", "INTERMITENTE", "TEMPORAL")
 
-    if (mostrarModalDetalle && trabajadorSeleccionado != null) {
-        val empleado = trabajadorSeleccionado!!
+        var mostrarPensiones by remember { mutableStateOf(false) }
+        val opcionesPension = listOf("ONP", "AFP INTEGRA", "AFP PRIMA", "AFP PROFUTURO", "AFP HABITAT")
+
+        AlertDialog(
+            onDismissRequest = { mostrarModalAgregar = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (dni.trim().length != 8 || !dni.all { it.isDigit() }) {
+                            errorDni = "El DNI debe tener exactamente 8 números"
+                        } else {
+                            errorDni = null
+                            scopeParaCorrutinas.launch(Dispatchers.IO) {
+                                try {
+                                    val sueldoNumerico = sueldoStr.toDoubleOrNull() ?: 1025.00
+                                    val nuevoEmpleado = com.example.asisnet_contable.PostgresDriver.EmpleadoLaboral(
+                                        dni = dni.trim(),
+                                        nombresCompletos = nombres.trim(),
+                                        fechaNacimiento = fechaNacimiento.trim().ifEmpty { "1990-01-01" },
+                                        sexo = "MASCULINO", telefono = "-", correo = "-", primeraDireccion = "-", paisEmisor = "PERU", nacionalidad = "PERUANA", estadoCivil = "SOLTERO", categoria = "EMPLEADO",
+                                        ocupacion = cargo.trim(),
+                                        tipoContrato = contrato.trim(),
+                                        fechaInicioLabores = "2026-01-01", estadoSunat = "Activo", regimenLaboral = "REGIMEN GENERAL",
+                                        regimenPensionario = regimenPensionarioSeleccionado,
+                                        cuspp = "-", regimenSalud = "ESSALUD", entidadPrestadora = "-", fechaInicioPension = "2026-01-01", fechaInicioSalud = "2026-01-01",
+                                        remuneracionBasica = sueldoNumerico, tipoPeriodicidadPago = "MENSUAL", jornadaLaboral = "JORNADA TRABAJO TIEMPO COMPLETO"
+                                    )
+                                    val exito = com.example.asisnet_contable.PostgresDriver.insertarNuevoTrabajador(rucEmpresa, nuevoEmpleado)
+                                    withContext(Dispatchers.Main) {
+                                        if (exito) {
+                                            onTrabajadorAgregado()
+                                            mostrarModalAgregar = false
+                                            dni = ""; nombres = ""; fechaNacimiento = ""; regimenPensionarioSeleccionado = "ONP"
+                                        } else {
+                                            android.widget.Toast.makeText(contexto, "Error al guardar en BD", android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    withContext(Dispatchers.Main) {
+                                        android.widget.Toast.makeText(contexto, "Error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarModalAgregar = false }) { Text("Cancelar") }
+            },
+            title = { Text("Registrar Trabajador", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = dni,
+                        onValueChange = { input ->
+                            if (input.all { it.isDigit() } && input.length <= 8) {
+                                dni = input
+                                errorDni = null
+                                if (input.length == 8 && !cargandoApi) {
+                                    cargandoApi = true
+                                    scopeParaCorrutinas.launch(Dispatchers.IO) {
+                                        try {
+                                            val nombreEncontrado = com.example.asisnet_contable.PostgresDriver.consultarDniApiPeru(input)
+                                            withContext(Dispatchers.Main) {
+                                                if (nombreEncontrado != null) {
+                                                    nombres = nombreEncontrado
+                                                    activarBotSbs = true
+                                                }
+                                            }
+                                        } catch (e: Exception) {}
+                                        finally { withContext(Dispatchers.Main) { cargandoApi = false } }
+                                    }
+                                }
+                            }
+                        },
+                        label = { Text(if (cargandoApi) "Buscando en API Perú..." else "DNI") },
+                        isError = errorDni != null,
+                        supportingText = { errorDni?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(value = nombres, onValueChange = { nombres = it }, label = { Text("Nombres Completos") }, modifier = Modifier.fillMaxWidth())
+
+                    Box(modifier = Modifier.fillMaxWidth().clickable { mostrarSelectorFecha = true }) {
+                        OutlinedTextField(
+                            value = fechaNacimiento, onValueChange = {}, label = { Text("Fecha Nacimiento (AAAA-MM-DD)") }, placeholder = { Text("Selecciona una fecha...") },
+                            readOnly = true, enabled = false,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline,
+                                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    OutlinedTextField(value = cargo, onValueChange = { cargo = it }, label = { Text("Cargo u Ocupación") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = sueldoStr, onValueChange = { sueldoStr = it }, label = { Text("Sueldo Básico (S/)") }, modifier = Modifier.fillMaxWidth())
+
+                    // Selector de Contratos nativo
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = contrato, onValueChange = {}, label = { Text("Tipo Contrato") }, readOnly = true, enabled = false,
+                            colors = OutlinedTextFieldDefaults.colors(disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline, disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                            modifier = Modifier.fillMaxWidth().clickable { mostrarContratos = true }
+                        )
+                        DropdownMenu(expanded = mostrarContratos, onDismissRequest = { mostrarContratos = false }) {
+                            opcionesContrato.forEach { opcion ->
+                                DropdownMenuItem(text = { Text(opcion) }, onClick = { contrato = opcion; mostrarContratos = false })
+                            }
+                        }
+                    }
+
+                    // Selector de Régimen Pensionario (AFP / ONP)
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = regimenPensionarioSeleccionado, onValueChange = {}, label = { Text("Régimen Pensionario") }, readOnly = true, enabled = false,
+                            colors = OutlinedTextFieldDefaults.colors(disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline, disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                            modifier = Modifier.fillMaxWidth().clickable { mostrarPensiones = true }
+                        )
+                        DropdownMenu(expanded = mostrarPensiones, onDismissRequest = { mostrarPensiones = false }) {
+                            opcionesPension.forEach { opcion ->
+                                DropdownMenuItem(text = { Text(opcion) }, onClick = { regimenPensionarioSeleccionado = opcion; mostrarPensiones = false })
+                            }
+                        }
+                    }
+
+                    // Invocación del Bot Scraper de forma segura dentro de la jerarquía
+                    if (activarBotSbs && dni.length == 8) {
+                        BotScraperSBS(
+                            dni = dni,
+                            onResultadoEncontrado = { afpAsignada ->
+                                regimenPensionarioSeleccionado = afpAsignada
+                                activarBotSbs = false
+                                android.widget.Toast.makeText(contexto, "Sincronizado: $afpAsignada", android.widget.Toast.LENGTH_SHORT).show()
+                            },
+                            onDismissRequest = { activarBotSbs = false }
+                        )
+                    }
+                }
+            }
+        )
+    }
+
+                    if (mostrarModalDetalle && trabajadorSeleccionado != null) {
         AlertDialog(
             onDismissRequest = { mostrarModalDetalle = false },
             confirmButton = {
-                Button(onClick = { mostrarModalDetalle = false }) {
-                    Text("Cerrar")
-                }
+                Button(onClick = { mostrarModalDetalle = false }) { Text("Cerrar") }
             },
-            title = {
-                Text(
-                    text = empleado.nombresCompletos,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-            },
+            title = { Text("Detalle del Trabajador", fontWeight = FontWeight.Bold) },
             text = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 400.dp) // Reducimos ligeramente el alto máximo para dar aire al botón Cerrar
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    HorizontalDivider()
-
-                    // 1. IDENTIFICACIÓN
-                    Text(text = "👤 TRABAJADOR - Datos de identificación", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF6750A4))
-                    Text(text = "DNI: ${empleado.dni}", fontSize = 14.sp)
-                    Text(text = "Fecha nacimiento: ${empleado.fechaNacimiento}", fontSize = 14.sp)
-                    Text(text = "País Emisor: ${empleado.paisEmisor}", fontSize = 14.sp)
-                    Text(text = "Sexo: ${empleado.sexo}", fontSize = 14.sp)
-                    Text(text = "Estado Civil: ${empleado.estadoCivil}", fontSize = 14.sp)
-                    Text(text = "Nacionalidad: ${empleado.nacionalidad}", fontSize = 14.sp)
-                    Text(text = "Teléfono: ${empleado.telefono}", fontSize = 14.sp)
-                    Text(text = "Correo electrónico: ${empleado.correo}", fontSize = 14.sp)
-                    Text(text = "Primera dirección: ${empleado.primeraDireccion}", fontSize = 14.sp)
-
-                    HorizontalDivider()
-
-                    // 2. LABORALES
-                    Text(text = "💼 Datos laborales", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF6750A4))
-                    Text(text = "Régimen laboral: ${empleado.regimenLaboral}", fontSize = 14.sp)
-                    Text(text = "Categoría ocupacional: ${empleado.categoria}", fontSize = 14.sp)
-                    Text(text = "Ocupación: ${empleado.ocupacion}", fontSize = 14.sp)
-                    Text(text = "Tipo de contrato: ${empleado.tipoContrato}", fontSize = 14.sp)
-                    Text(text = "Fecha inicio: ${empleado.fechaInicioLabores}", fontSize = 14.sp)
-                    Text(text = "Jornada laboral: ${empleado.jornadaLaboral}", fontSize = 14.sp)
-                    Text(text = "Tipo de pago y periodicidad: ${empleado.tipoPeriodicidadPago}", fontSize = 14.sp)
-                    Text(text = "Remuneración básica inicial: S/ ${String.format("%.2f", empleado.remuneracionBasica)}", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-
-                    HorizontalDivider()
-
-                    // 3. SALUD
-                    Text(text = "🏥 Régimen de aseguramiento de salud", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF6750A4))
-                    Text(text = "Régimen de salud: ${empleado.regimenSalud}", fontSize = 14.sp)
-                    Text(text = "Entidad prestadora: ${empleado.entidadPrestadora}", fontSize = 14.sp)
-                    Text(text = "Fecha de inicio: ${empleado.fechaInicioSalud}", fontSize = 14.sp)
-
-                    HorizontalDivider()
-
-                    // 4. PENSIÓN
-                    Text(text = "💰 Régimen pensionario", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF6750A4))
-                    Text(text = "Régimen pensionario: ${empleado.regimenPensionario}", fontSize = 14.sp)
-                    Text(text = "CUSPP: ${empleado.cuspp}", fontSize = 14.sp)
-                    Text(text = "Fecha de inicio: ${empleado.fechaInicioPension}", fontSize = 14.sp)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Nombres: ${trabajadorSeleccionado!!.nombresCompletos}", fontWeight = FontWeight.Medium)
+                    Text("DNI: ${trabajadorSeleccionado!!.dni}")
+                    Text("Fecha Nacimiento: ${trabajadorSeleccionado!!.fechaNacimiento}")
+                    Text("Cargo: ${trabajadorSeleccionado!!.ocupacion}")
+                    Text("Sueldo: S/ ${trabajadorSeleccionado!!.remuneracionBasica}")
+                    Text("Contrato: ${trabajadorSeleccionado!!.tipoContrato}")
+                    Text("Estado SUNAT: ${trabajadorSeleccionado!!.estadoSunat}")
                 }
-            },
-
-            shape = RoundedCornerShape(16.dp),
-            containerColor = Color.White
+            }
         )
     }
+
+    if (mostrarSelectorFecha) {
+        DatePickerDialog(
+            onDismissRequest = { mostrarSelectorFecha = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val milisegundosSeleccionados = datePickerState.selectedDateMillis
+                        if (milisegundosSeleccionados != null) {
+                            val formatoIsof = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                            formatoIsof.timeZone = TimeZone.getTimeZone("UTC")
+                            fechaNacimiento = formatoIsof.format(Date(milisegundosSeleccionados))
+                        }
+                        mostrarSelectorFecha = false
+                    }
+                ) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarSelectorFecha = false }) { Text("Cancelar") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
 }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun BotScraperSBS(
+        dni: String,
+        onResultadoEncontrado: (String) -> Unit,
+        onDismissRequest: () -> Unit
+    ) {
+        androidx.compose.ui.viewinterop.AndroidView(
+            factory = { ctx ->
+                android.webkit.WebView(ctx).apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36"
+
+                    addJavascriptInterface(object {
+                        @android.webkit.JavascriptInterface
+                        fun enviarAfp(htmlCuerpo: String) {
+                            val afpDetectada = when {
+                                htmlCuerpo.contains("PRIMA", ignoreCase = true) -> "AFP PRIMA"
+                                htmlCuerpo.contains("INTEGRA", ignoreCase = true) -> "AFP INTEGRA"
+                                // REEMPLAZA la línea 376 para que se vea así:
+                                htmlCuerpo.contains("PROFUTURO", ignoreCase = true) -> "AFP PROFUTURO"
+
+                                htmlCuerpo.contains("HABITAT", ignoreCase = true) -> "AFP HABITAT"
+                                else -> "ONP"
+                            }
+                            post { onResultadoEncontrado(afpDetectada) }
+                        }
+                    }, "AndroidBot")
+
+                    webViewClient = object : android.webkit.WebViewClient() {
+                        var ejecucionAutomatica = true
+
+                        override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            if (ejecucionAutomatica) {
+                                val scriptBot = """
+                                (function() {
+                                    var comboDoc = document.getElementById('ctl00_ContentPlaceHolder1_cboTipoDoc');
+                                    if(comboDoc) comboDoc.value = '00';
+                                    var inputDni = document.getElementById('ctl00_ContentPlaceHolder1_txtNumeroDoc');
+                                    if(inputDni) inputDni.value = '$dni';
+                                    var btnBuscar = document.getElementById('ctl00_ContentPlaceHolder1_btnBuscar');
+                                    if(btnBuscar) btnBuscar.click();
+                                })();
+                            """.trimIndent()
+                                evaluateJavascript(scriptBot, null)
+                                ejecucionAutomatica = false
+                            } else {
+                                val scriptLectura = "window.AndroidBot.enviarAfp(document.body.innerText);"
+                                handler.postDelayed({ evaluateJavascript(scriptLectura, null) }, 1500)
+                            }
+                        }
+                    }
+                    loadUrl("https://sbs.gob.pe")
+                }
+            },
+            modifier = Modifier.size(0.dp)
+        )
+    }
+
+
