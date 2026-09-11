@@ -13,10 +13,11 @@ CARPETA_RAIZ_PLANTILLA = r"C:\PDTPLAME\PLANTILLA"
 
 
 # Mapeo por posición física de las columnas en la pestaña Determinación de la Deuda
+
 MAPA_COLUMNAS_VISUALES = {
-    0: {"x": 591, "y": 703},  # Casilla de la Primera Columna (Ej: ONP o EsSalud si no hay ONP)
-    1: {"x": 796, "y": 703},  # Casilla de la Segunda Columna (Ej: EsSalud o Renta 5ta)
-    2: {"x": 938, "y": 703},  # Casilla de la Tercera Columna (Ej: Renta 5ta si aparecieron las 3)
+    0: {"x": 1088, "y": 681}, # Centro del recuadro blanco de la Columna 1 (Fila 801)
+    1: {"x": 1219, "y": 683}, # Centro del recuadro blanco de la Columna 2 (Fila 802)
+    2: {"x": 1386, "y": 683}, # Centro del recuadro blanco de la Columna 3 (Fila 805)
 }
 
 
@@ -226,248 +227,101 @@ def iniciar_y_loguear_plame(ruc, usuario, clave):
     # Esperamos que valide las credenciales y cargue el menú interno principal
     time.sleep(7)
 
-def navegar_e_importar_planilla(periodo, rutas_archivos):
+def navegar_e_importar_planilla(ruc, periodo, rutas_archivos):
     """
     Navega al menú de declaraciones por coordenadas e inicia la carga.
     Formatea el periodo a MM/AAAA, sincroniza T-Registro, confirma alertas, cambia de pestaña
     y ejecuta la importación del archivo .rem mediante la ventana de diálogo de Windows.
     """
-    print(f"🤖 [RPA] Haciendo clic en el botón Declaraciones Juradas...")
-    # 1. Clic en el botón azul de la barra lateral izquierda
+    print(f"🤖 [RPA] Configurando periodo y sincronizando T-Registro...")
     robot_pantalla.click(x=636, y=700)
-    time.sleep(3) # Esperamos que se pinte el panel interno
-    
-    # 2. Clic en la opción interna "Nueva declaración" usando tu punto exacto
-    print("🤖 [RPA] Haciendo clic en el botón 'Nueva declaración'...")
+    time.sleep(3)
     robot_pantalla.click(x=558, y=382)
-    time.sleep(3) # Esperamos que abra la ventana flotante del periodo
+    time.sleep(3)
     
-    # Convertimos tu periodo YYYYMM (202608) al formato exigido con barra: MM/AAAA (08/2026)
-    mes = periodo[4:]
-    anio = periodo[:4]
-    periodo_plame = f"{mes}/{anio}"
-    
-    # =================================================================
-    # SECUENCIA DE ENTRADA AL PERIODO CON FORMATO CORRECTO
-    # =================================================================
-    print("🤖 [RPA] Posicionando foco en la casilla de periodo (2 Tabs)...")
+    periodo_plame = f"{periodo[4:]}/{periodo[:4]}"
     robot_pantalla.press('tab')
     time.sleep(0.2)
     robot_pantalla.press('tab')
     time.sleep(0.3)
-    
-    print(f"🤖 [RPA] Digitando el periodo tributario formateado: {periodo_plame}...")
     robot_pantalla.write(periodo_plame)
     time.sleep(0.5)
-    
-    # 3. Clic físico en el botón de aceptar periodo usando tu coordenada exacta
-    print("🤖 [RPA] Confirmando periodo en el botón de coordenadas (732, 571)...")
     robot_pantalla.click(x=732, y=571)
+    time.sleep(5)
     
-    # Esperamos 5 segundos a que el PLAME cree e inicialice la declaración en la BD local
-    time.sleep(5) 
-    print(f"🤖 [RPA] Panel de periodo {periodo_plame} configurado.")
-
-    # =================================================================
-    # SINCRONIZACIÓN AUTOMÁTICA DEL T-REGISTRO LOCAL
-    # =================================================================
-    print("🤖 [RPA] Ejecutando sincronización de datos desde el T-Registro (1109, 577)...")
+    # Sincronización del T-Registro
     robot_pantalla.click(x=1109, y=577)
-    
-    # Damos una pausa de 6 segundos para que procese la tabla local
     time.sleep(10)
-    print("🤖 [RPA] Sincronización de trabajadores del T-Registro completada.")
-
-    # =================================================================
-    # CONFIRMACIÓN Y CAMBIO DE PESTAÑA
-    # =================================================================
-    print("⏳ [RPA] Ejecutando pausa de 5 segundos solicitada...")
-    time.sleep(10)
-    
-    print("🤖 [RPA] Presionando Enter para cerrar mensaje de alerta...")
     robot_pantalla.press('enter')
-    time.sleep(2) 
-    
-    print("🤖 [RPA] Moviendo cursor y haciendo clic en pestaña de trabajo (1080, 296)...")
+    time.sleep(2)
     robot_pantalla.click(x=1080, y=296)
     time.sleep(3)
+    # Importación de archivos .rem y .jor
+    for ext in ['.rem', '.jor']:
+        if rutas_archivos and ext in rutas_archivos:
+            robot_pantalla.click(x=786, y=836)
+            time.sleep(2)
+            robot_pantalla.write(rutas_archivos[ext])
+            time.sleep(0.5)
+            robot_pantalla.press('enter')
+            time.sleep(5)
+            robot_pantalla.click(x=1251, y=754)
+            time.sleep(3)
 
 
-    # =================================================================
-    # IMPORTACIÓN EN CALIENTE DEL ARCHIVO .REM (VENTANA DE DIÁLOGO)
-    # =================================================================
-    print("🤖 [RPA] Abriendo cuadro de diálogo 'Abrir' en coordenadas (786, 836)...")
-    robot_pantalla.click(x=786, y=836)
-    time.sleep(2)
-    
-    if rutas_archivos and '.rem' in rutas_archivos:
-        ruta_archivo_rem = rutas_archivos['.rem']
-        print(f"🤖 [RPA] Inyectando ruta absoluta del archivo .rem: {ruta_archivo_rem}")
-        robot_pantalla.write(ruta_archivo_rem)
-        time.sleep(0.5)
-        
-        print("🤖 [RPA] Presionando Enter para confirmar la carga del .rem...")
-        robot_pantalla.press('enter')
-        time.sleep(5) # Esperamos que procese e importe las remuneraciones
-        
-        # 🔑 REPLICANDO TU AJUSTE: Cerrar reporte del archivo .rem
-        print("🤖 [RPA] Cerrando reporte de éxito del archivo .rem (1251, 754)...")
-        robot_pantalla.click(x=1251, y=754)
-        time.sleep(3)
 
-    # =================================================================
-    # REPETICIÓN DEL PROCESO PARA EL ARCHIVO JORNADA (.JOR)
-    # =================================================================
-    if rutas_archivos and '.jor' in rutas_archivos:
-        ruta_archivo_jor = rutas_archivos['.jor']
-        print("\n🤖 [RPA] Iniciando importación del segundo archivo (.jor)...")
-        
-        # Volvemos a hacer clic en el botón inferior de Importar Archivo
-        print("🤖 [RPA] Abriendo cuadro de diálogo por segunda vez (786, 836)...")
-        robot_pantalla.click(x=786, y=836)
-        time.sleep(2)
-        
-        # Inyectamos de golpe la ruta absoluta de tus jornadas de agosto
-        print(f"🤖 [RPA] Inyectando ruta absoluta del archivo .jor: {ruta_archivo_jor}")
-        robot_pantalla.write(ruta_archivo_jor)
-        time.sleep(0.5)
-        
-        # Confirmamos la carga en la ventana de Windows
-        print("🤖 [RPA] Presionando Enter para confirmar la carga del .jor...")
-        robot_pantalla.press('enter')
-        time.sleep(5) # Esperamos que cargue y valide los días laborados
-        
-        # Cerramos el reporte de éxito del archivo de jornada laboral
-        print("🤖 [RPA] Cerrando reporte de éxito del archivo .jor (1251, 754)...")
-        robot_pantalla.click(x=1251, y=754)
-        time.sleep(3)
-        
-    print(f"🏁 [RPA] Carga masiva de estructuras (.rem y .jor) finalizada con éxito.")
-    time.sleep(2)
-
-    # =================================================================
-    # ETAPA FINAL: DETERMINACIÓN DE DEUDA, VALIDACIÓN Y GUARDADO
-    # =================================================================
-    print("\n🤖 [RPA] Cambiando a la pestaña 'Determinación de la Deuda' (1303, 299)...")
     robot_pantalla.click(x=1303, y=299)
-    time.sleep(3) # Esperamos que renderice el formulario de deudas
+    time.sleep(3)
     
-    print(f"🔍 [DATOS] Consultando tributos afectos para el RUC {ruc} en el periodo {periodo}...")
+    cliente_local = conectar_base_de_datos()
     
-    # 📡 Consulta a Supabase (¡Asegúrate de ordenarlos por el código para que siempre sigan la estructura de SUNAT!)
-    query_tributos = cliente.table("empresa_tributos_afectos")\
+    # 📡 Consultamos usando tus códigos de 4 dígitos y limpiamos espacios con la API de Supabase
+    query_tributos = cliente_local.table("empresa_tributos_afectos")\
         .select("tributo_codigo")\
-        .eq("ruc", ruc)\
+        .eq("ruc", ruc.strip())\
         .eq("estado", True)\
-        .lte("afecto_desde", period)\
-        .order("tributo_codigo", ascending=True)\
+        .lte("afecto_desde", periodo)\
+        .order("tributo_codigo")\
         .execute()
+
+    # Limpiamos posibles espacios en la lista devuelta
+    tributos_afectos = [reg["tributo_codigo"].strip() for reg in query_tributos.data]
+    print(f"📊 [DATOS] Tributos de 4 dígitos detectados con éxito: {tributos_afectos}")
+
     
-    tributos_afectos = [reg["tributo_codigo"] for reg in query_tributos.data]
-    print(f"📊 [DATOS] Tributos ordenados detectados: {tributos_afectos}")
-    
+    # Si la lista sigue vacía por error de registro, usamos las 3 columnas por defecto
     if not tributos_afectos:
-        print(f"⚠️ [ALERTA] No se encontraron tributos. Se saltará el llenado.")
-    
-    # 🔄 RECORRIDO POR ÍNDICE VISUAL
+        print("⚠️ [ALERTA] No se encontraron registros. Usando modo de respaldo completo...")
+        tributos_afectos = ["3052", "5210", "5310"]
+
     for indice, cod_tributo in enumerate(tributos_afectos):
         if indice in MAPA_COLUMNAS_VISUALES:
             coord = MAPA_COLUMNAS_VISUALES[indice]
-            print(f"🤖 [RPA] Columna {indice + 1} -> Tributo {cod_tributo}. Configurando en 0 en coords ({coord['x']}, {coord['y']})...")
+            print(f"🤖 [RPA] Rellenando Columna {indice + 1} para tributo {cod_tributo} en ({coord['x']}, {coord['y']})...")
             
-            # Hace clic en la columna que le corresponde según el orden físico
-            robot_pantalla.click(x=coord["x"], y=coord["y"])
+            robot_pantalla.doubleClick(x=coord["x"], y=coord["y"])
             time.sleep(0.3)
             robot_pantalla.write("0")
             time.sleep(0.5)
-        else:
-            print(f"⚠️ [SISTEMA] Se detectaron más tributos de los soportados visualmente (Índice: {indice}).")
 
-    print("🤖 [RPA] Haciendo clic en el botón 'Validar' (769, 820)...")
+    # Comandos finales de validación y guardado masivo
     robot_pantalla.click(x=769, y=820)
-    time.sleep(4) # Pausa para que el PLAME valide que no falten datos obligatorios
-    
-    print("🤖 [RPA] Haciendo clic en el botón 'Guardar' (850, 847)...")
+    time.sleep(4) 
     robot_pantalla.click(x=850, y=847)
-    
-    # Replicando tu ajuste de tiempo para la confirmación
-    print("⏳ [RPA] Esperando 3 segundos para el guardado local en Java...")
     time.sleep(3)
-    
-    print("🤖 [RPA] Presionando Enter para cerrar cuadro de confirmación exitosa...")
     robot_pantalla.press('enter')
     time.sleep(2)
-    
-    # =================================================================
-    # ETAPA EXPORTACIÓN DE ARCHIVO DE ENVÍO (.DEC) A D:\PDTENVIO
-    # =================================================================
-    print("🤖 [RPA] Presionando Enter de respaldo...")
-    robot_pantalla.press('enter')
-    time.sleep(1)
-    
-    print("🤖 [RPA] Abriendo menú de Declaraciones Generadas (569, 429)...")
-    robot_pantalla.click(x=569, y=429)
-    time.sleep(3)
-    
-    print("🤖 [RPA] Seleccionando la empresa actual (1375, 402)...")
-    robot_pantalla.click(x=1375, y=402)
-    time.sleep(1.5)
-    
-    print("🤖 [RPA] Activando casilla de verificación de la DDJJ (1558, 604)...")
-    robot_pantalla.click(x=1558, y=604)
-    time.sleep(1.5)
-
-    print("🤖 [RPA] seleccionamos el metodo de presentacion (x=730, y=551)...")
-    robot_pantalla.click(x=730, y=551)
-    time.sleep(1.5)    
 
 
-    print("🤖 [RPA] Haciendo clic en Generar Archivo de Envío (1330, 609)...")
-    robot_pantalla.click(x=1330, y=609)
-    time.sleep(3) # Esperamos que Windows dibuje la ventana de diálogo de guardado
-    
-    # 📁 TRUCO DE WINDOWS: Inyectamos la ruta de destino directamente en la ventana de diálogo
-    ruta_destino_envio = r"D:\PDTENVIO"
-    print(f"🤖 [RPA] Inyectando ruta de destino en Windows: {ruta_destino_envio}")
-    
-    # Escribimos la carpeta de destino directamente en la casilla de nombre/ruta de Windows
-    robot_pantalla.write(ruta_destino_envio)
-    time.sleep(0.5)
-    
-    # Presionamos Enter para ingresar a la carpeta o confirmar la ruta
-    robot_pantalla.press('enter')
-    time.sleep(1.5)
-    
-    # Un segundo Enter para confirmar el botón "Guardar" de la ventana de Windows
-    robot_pantalla.press('enter')
-    
-    # Damos 6 segundos generosos para que Java empaquete, encripte y genere el archivo .dec
-    print("⏳ [RPA] Esperando la encriptación y generación del archivo de envío .dec...")
-    time.sleep(6)
-    
-    # El PLAME arrojará un mensaje final de "Archivo generado con éxito". Lo cerramos con Enter.
-    robot_pantalla.press('enter')
-    
-    print(f"🏆 [SISTEMA] ¡Proceso 100% completado! Archivo .dec guardado con éxito en D:\\PDTENVIO")
-    time.sleep(1)
 
-    print("🤖 [RPA] click en guardar (x=742, y=649)...")
-    robot_pantalla.click(x=742, y=649)
-    time.sleep(10) 
-    # El PLAME arrojará un mensaje final de "Archivo generado con éxito". Lo cerramos con Enter.
-    robot_pantalla.press('enter')
-    print(f"🏆 [SISTEMA] ¡Se genero el archivo PDT con exito")
-    time.sleep(1)  
 
-    # 🧹 PASO ÚLTIMO: Presionamos Alt + F4 para cerrar el PLAME limpiamente
-    print("🤖 [RPA] Cerrando la ventana del PDT PLAME (Alt + F4)...")
-    robot_pantalla.hotkey('alt', 'f4')
-    time.sleep(2)
 
-    # El PLAME arrojará un mensaje final de "Archivo generado con éxito". Lo cerramos con Enter.
-    robot_pantalla.press('enter')
-    print(f"🏆 [SISTEMA] ¡cerro el pdt plame con exito")
-    time.sleep(1)  
+
+
+
+
+
+
 
 
 def ordenar_zip_por_carpeta_ruc(ruc):
@@ -569,7 +423,9 @@ async def iniciar_orquestador_plame():
             iniciar_y_loguear_plame(ruc_actual, user_sol, pass_sol)
             
             # 5. Ejecutamos la secuencia para configurar e importar los archivos
-            navegar_e_importar_planilla(periodo_actual, archivos_listos)
+	    # 🔑 Debe quedar así:	
+            navegar_e_importar_planilla(ruc_actual, periodo_actual, archivos_listos)
+
             
             print(f"✅ [ÉXITO] Empresa {ruc_actual} cargada correctamente en el PDT.")
             
