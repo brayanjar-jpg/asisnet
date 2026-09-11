@@ -4,6 +4,9 @@
 import os
 from datetime import datetime
 
+CARPETA_ORIGEN_ENVIO = r"D:\PDTENVIO"
+CARPETA_RAIZ_PLANTILLA = r"C:\PDTPLAME\PLANTILLA"
+
 # Truco maestro: Cargamos la librería de la nube de forma oculta para el filtro
 modulo_nube = __import__('su' + 'pa' + 'ba' + 'se')
 
@@ -499,8 +502,15 @@ async def iniciar_orquestador_plame():
             
             print(f"✅ [ÉXITO] Empresa {ruc_actual} cargada correctamente en el PDT.")
             
+            # =================================================================
+            # ✨ LÍNEA AGREGADA: CORRECCIÓN COMPLETA PARA TU BOT WEB
+            # =================================================================
+            print(f"📦 [SISTEMA] Resguardando el archivo .zip original en su carpeta RUC...")
+            ordenar_zip_por_carpeta_ruc(ruc_actual)
+            
         except Exception as error_rpa:
             print(f"❌ [ALERTA] Falló la automatización de pantalla para este RUC: {error_rpa}")
+
             
         finally:
             # 6. Forzamos el cierre del proceso Java para liberar memoria (opcional en pruebas)
