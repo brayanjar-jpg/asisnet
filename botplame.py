@@ -2,11 +2,23 @@
 # PARTE 1: INICIALIZACIÓN DINÁMICA Y EXTRACCIÓN DE DATOS
 # =====================================================================
 import os
-import tkinter as tk
+import shutil
+import time
+import subprocess
+import glob 
 from datetime import datetime
 
 CARPETA_ORIGEN_ENVIO = r"D:\PDTENVIO"
 CARPETA_RAIZ_PLANTILLA = r"C:\PDTPLAME\PLANTILLA"
+
+
+# Mapeo por posición física de las columnas en la pestaña Determinación de la Deuda
+MAPA_COLUMNAS_VISUALES = {
+    0: {"x": 591, "y": 703},  # Casilla de la Primera Columna (Ej: ONP o EsSalud si no hay ONP)
+    1: {"x": 796, "y": 703},  # Casilla de la Segunda Columna (Ej: EsSalud o Renta 5ta)
+    2: {"x": 938, "y": 703},  # Casilla de la Tercera Columna (Ej: Renta 5ta si aparecieron las 3)
+}
+
 
 # Truco maestro: Cargamos la librería de la nube de forma oculta para el filtro
 modulo_nube = __import__('su' + 'pa' + 'ba' + 'se')
@@ -147,15 +159,24 @@ RUTA_EJECUTABLE_PLAME = r"C:\Program Files (x86)\PLAME\PDT_PLAME\PDT_PLAME.exe"
 
 
 def pegar_texto(texto):
-    # Accede al portapapeles nativo de Windows
-    r = tk.Tk()
-    r.withdraw()
-    r.clipboard_clear()
-    r.clipboard_append(texto)
-    r.update() # Mantiene el texto en memoria
+    """Copia la contraseña al portapapeles de Windows y simula Ctrl+V asegurando el import interno"""
+    # Forzamos el import aquí adentro para evitar problemas de alcance en el script
+    import pyperclip  
     
-    # Simula Control + V para pegar de golpe
+    # 1. Inyecta la clave directo a la memoria de Windows
+    pyperclip.copy(texto)
+    time.sleep(0.3)  # Pausa breve para asegurar que Windows registre el cambio
+    
+
+    # 2. Simula la combinación de teclas para pegar en la casilla del PLAME
     robot_pantalla.hotkey('ctrl', 'v')
+    time.sleep(0.3)
+    
+    # 3. Limpieza inmediata del portapapeles para proteger la clave SOLD:\PDTENVIO
+
+
+    pyperclip.copy("")
+
 
 
 def iniciar_y_loguear_plame(ruc, usuario, clave):
@@ -163,47 +184,48 @@ def iniciar_y_loguear_plame(ruc, usuario, clave):
     print(f"🤖 [RPA] Levantando proceso PLAME...")
     subprocess.Popen(RUTA_EJECUTABLE_PLAME)
     
-    # 1. Esperamos a que cargue esta pantalla de bienvenida de tu foto
+    # 1. Esperamos a que cargue la pantalla de bienvenida del PDT
     time.sleep(8)
     
-    # 2. NUEVO PASO: Presionamos ENTER para activar el botón azul "Ingresar al PDT"
+    # 2. Presionamos ENTER para activar el botón azul "Ingresar al PDT"
     print(f"🤖 [RPA] Saltando pantalla de bienvenida...")
     robot_pantalla.click(x=1242, y=583)
     
-    # Damos una pequeña pausa de 3 segundos para que cargue la caja del RUC/Usuario/Clave
+    # Damos una pequeña pausa de 3 segundos para que cargue la caja de login
     time.sleep(3)
     
-      
     print(f"🤖 [RPA] Posicionando el cursor en la casilla RUC (Secuencia de 2 Tabs)...")
-    # 🔑 AQUÍ REPLICAMOS TU DESCUBRIMIENTO:
     robot_pantalla.press('tab')
     time.sleep(0.2)
     robot_pantalla.press('tab')
     time.sleep(0.3)
     
     print(f"🤖 [RPA] Escribiendo credenciales SOL...")
-    # Ahora que el cursor está firmemente en el RUC, escribimos de corrido
+    
+    # Escribimos el RUC (son solo números, corre bien con write)
     robot_pantalla.write(ruc)
     time.sleep(0.3)
-    robot_pantalla.press('tab') # Un tab para bajar a USUARIO
+    
+    robot_pantalla.press('tab')  # Un tab para bajar a USUARIO
     time.sleep(0.3)
     
+    # Escribimos el USUARIO SOL (letras simples en mayúscula)
     robot_pantalla.write(usuario)
     time.sleep(0.3)
-    robot_pantalla.press('tab') # Un tab para bajar a CLAVE
+    
+    robot_pantalla.press('tab')  # Un tab para bajar a CLAVE
     time.sleep(0.5)
     
-    # En lugar de: robot_pantalla.write(clave)
-    # Usas:
+    # 🔑 CORRECCIÓN CRÍTICA: Pegamos la clave de forma segura y exacta usando el portapapeles
     pegar_texto(clave)
     time.sleep(0.5)
-
     
     # Presionamos Enter para enviar el formulario y acceder al sistema
     robot_pantalla.press('enter')
     
     # Esperamos que valide las credenciales y cargue el menú interno principal
     time.sleep(7)
+
 def navegar_e_importar_planilla(periodo, rutas_archivos):
     """
     Navega al menú de declaraciones por coordenadas e inicia la carga.
@@ -330,18 +352,37 @@ def navegar_e_importar_planilla(periodo, rutas_archivos):
     robot_pantalla.click(x=1303, y=299)
     time.sleep(3) # Esperamos que renderice el formulario de deudas
     
-    print("🤖 [RPA] Configurando Importe a Pagar de EsSalud en 0...")
-    robot_pantalla.click(x=1048, y=687)
-    time.sleep(0.3)
-    robot_pantalla.write("0")
-    time.sleep(0.5)
+    print(f"🔍 [DATOS] Consultando tributos afectos para el RUC {ruc} en el periodo {periodo}...")
     
-    print("🤖 [RPA] Configurando Importe a Pagar de Renta 5ta en 0...")
-    robot_pantalla.click(x=1270, y=683)
-    time.sleep(0.3)
-    robot_pantalla.write("0")
-    time.sleep(0.5)
+    # 📡 Consulta a Supabase (¡Asegúrate de ordenarlos por el código para que siempre sigan la estructura de SUNAT!)
+    query_tributos = cliente.table("empresa_tributos_afectos")\
+        .select("tributo_codigo")\
+        .eq("ruc", ruc)\
+        .eq("estado", True)\
+        .lte("afecto_desde", period)\
+        .order("tributo_codigo", ascending=True)\
+        .execute()
     
+    tributos_afectos = [reg["tributo_codigo"] for reg in query_tributos.data]
+    print(f"📊 [DATOS] Tributos ordenados detectados: {tributos_afectos}")
+    
+    if not tributos_afectos:
+        print(f"⚠️ [ALERTA] No se encontraron tributos. Se saltará el llenado.")
+    
+    # 🔄 RECORRIDO POR ÍNDICE VISUAL
+    for indice, cod_tributo in enumerate(tributos_afectos):
+        if indice in MAPA_COLUMNAS_VISUALES:
+            coord = MAPA_COLUMNAS_VISUALES[indice]
+            print(f"🤖 [RPA] Columna {indice + 1} -> Tributo {cod_tributo}. Configurando en 0 en coords ({coord['x']}, {coord['y']})...")
+            
+            # Hace clic en la columna que le corresponde según el orden físico
+            robot_pantalla.click(x=coord["x"], y=coord["y"])
+            time.sleep(0.3)
+            robot_pantalla.write("0")
+            time.sleep(0.5)
+        else:
+            print(f"⚠️ [SISTEMA] Se detectaron más tributos de los soportados visualmente (Índice: {indice}).")
+
     print("🤖 [RPA] Haciendo clic en el botón 'Validar' (769, 820)...")
     robot_pantalla.click(x=769, y=820)
     time.sleep(4) # Pausa para que el PLAME valide que no falten datos obligatorios
@@ -434,6 +475,9 @@ def ordenar_zip_por_carpeta_ruc(ruc):
     Busca el archivo .zip original con el nombre largo y encriptado del PLAME,
     y lo mueve INTACTO a la carpeta del RUC correspondiente para que el bot web lo lea.
     """
+    import glob
+    
+    # 1. Definir la búsqueda de cualquier archivo .zip en la carpeta de salida
     patron = os.path.join(CARPETA_ORIGEN_ENVIO, "*.zip")
     archivos_zip = glob.glob(patron)
     
@@ -441,25 +485,36 @@ def ordenar_zip_por_carpeta_ruc(ruc):
         print("❌ [SISTEMA] No se encontró el paquete encriptado .zip en la ruta de salida.")
         return None
         
-    # Capturamos el último .zip creado por fecha de modificación
+    # 2. Capturar el último .zip creado (el más reciente por fecha de modificación)
     archivos_zip.sort(key=os.path.getmtime)
     archivo_original_plame = archivos_zip[-1]
     nombre_nativo_zip = os.path.basename(archivo_original_plame)
     
-    # Definimos el destino exacto dentro de la carpeta RUC del cliente
-    carpeta_destino_ruc = os.path.join(CARPETA_RAIZ_PLANTILLA, ruc)
+    # 3. Definir el destino exacto dentro de la carpeta RUC del cliente
+    # Usamos CARPETA_RAIZ_PLAME porque así la definiste en tu Parte 2 del script original
+    carpeta_destino_ruc = os.path.join(CARPETA_RAIZ_PLAME, ruc)
+    
+    # SEGURIDAD EXTRA: Si por alguna razón la carpeta del RUC no existe, la crea al instante
+    if not os.path.exists(carpeta_destino_ruc):
+        os.makedirs(carpeta_destino_ruc)
+        print(f"📁 [SISTEMA] Creando carpeta RUC faltante: {carpeta_destino_ruc}")
+        
     ruta_final_intacta = os.path.join(carpeta_destino_ruc, nombre_nativo_zip)
     
     try:
-        if os.path.exists(ruta_final_intacta): 
+        # Si el archivo ya existía de un intento previo, lo elimina para no trabar el proceso
+        if os.path.exists(ruta_final_intacta):
             os.remove(ruta_final_intacta)
             
+        # Mueve físicamente el archivo .zip a la carpeta asignada
         shutil.move(archivo_original_plame, ruta_final_intacta)
-        print(f"   📦 [SISTEMA] Archivo original movido intacto a su carpeta RUC.")
+        print(f"📦 [SISTEMA] Archivo original movido intacto a: {ruta_final_intacta}")
         return ruta_final_intacta
+        
     except Exception as e:
-        print(f"❌ Error al mover archivo: {e}")
+        print(f"❌ Error al mover el archivo .zip: {e}")
         return None
+
 
 
 
