@@ -2,6 +2,7 @@
 # PARTE 1: INICIALIZACIÓN DINÁMICA Y EXTRACCIÓN DE DATOS
 # =====================================================================
 import os
+import tkinter as tk
 from datetime import datetime
 
 CARPETA_ORIGEN_ENVIO = r"D:\PDTENVIO"
@@ -145,6 +146,18 @@ robot_pantalla.FAILSAFE = True  # Si jalas el mouse a la esquina superior izquie
 RUTA_EJECUTABLE_PLAME = r"C:\Program Files (x86)\PLAME\PDT_PLAME\PDT_PLAME.exe"
 
 
+def pegar_texto(texto):
+    # Accede al portapapeles nativo de Windows
+    r = tk.Tk()
+    r.withdraw()
+    r.clipboard_clear()
+    r.clipboard_append(texto)
+    r.update() # Mantiene el texto en memoria
+    
+    # Simula Control + V para pegar de golpe
+    robot_pantalla.hotkey('ctrl', 'v')
+
+
 def iniciar_y_loguear_plame(ruc, usuario, clave):
     """Lanza la aplicación Java del PDT, salta la bienvenida e inicia sesión"""
     print(f"🤖 [RPA] Levantando proceso PLAME...")
@@ -180,8 +193,11 @@ def iniciar_y_loguear_plame(ruc, usuario, clave):
     robot_pantalla.press('tab') # Un tab para bajar a CLAVE
     time.sleep(0.5)
     
-    robot_pantalla.write(clave)
+    # En lugar de: robot_pantalla.write(clave)
+    # Usas:
+    pegar_texto(clave)
     time.sleep(0.5)
+
     
     # Presionamos Enter para enviar el formulario y acceder al sistema
     robot_pantalla.press('enter')
