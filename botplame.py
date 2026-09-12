@@ -304,13 +304,79 @@ def navegar_e_importar_planilla(ruc, periodo, rutas_archivos):
             robot_pantalla.write("0")
             time.sleep(0.5)
 
-    # Comandos finales de validación y guardado masivo
+    # ... (Esto va justo debajo del bucle for que escribe los ceros)
+    
+    # 1. Hace clic en el botón 'Validar' (769, 820)
     robot_pantalla.click(x=769, y=820)
     time.sleep(4) 
+    
+    # 2. Hace clic en el botón 'Guardar' (850, 847)
     robot_pantalla.click(x=850, y=847)
-    time.sleep(3)
+    time.sleep(4) # Esperamos a que procese y aparezca la ventana azul de éxito
+    
+    # 3. 🔑 CORRECCIÓN AQUÍ: Presionamos ENTER para cerrar el cuadro azul de confirmación exitosa
+    print("🤖 [RPA] Cerrando la ventana azul de confirmación del guardado...")
     robot_pantalla.press('enter')
     time.sleep(2)
+    
+    # 4. Presionamos un ENTER de respaldo por si la interfaz Java se congela
+    robot_pantalla.press('enter')
+    time.sleep(2)
+
+
+
+
+
+
+
+    # Secuencia para abrir declaraciones generadas y exportar
+    print("🤖 [RPA] Abriendo menú de Declaraciones Generadas...")
+    robot_pantalla.click(x=569, y=429)
+    time.sleep(3)
+    
+    print("🤖 [RPA] Seleccionando la empresa actual en la lista...")
+    robot_pantalla.click(x=1375, y=397)
+    time.sleep(1.5)
+    
+    print("🤖 [RPA] Activando casilla de verificación de la DDJJ...")
+    robot_pantalla.click(x=731, y=550)
+    time.sleep(1.5)
+  
+    
+    print("🤖 [RPA] Haciendo clic en Generar Archivo de Envío...")
+    robot_pantalla.click(x=1329, y=614)
+    time.sleep(2)
+    
+    print(f"🤖 [RPA] Inyectando ruta de destino en Windows: {CARPETA_ORIGEN_ENVIO}...")
+    robot_pantalla.write(CARPETA_ORIGEN_ENVIO)
+    time.sleep(0.5)
+    robot_pantalla.press('tab')
+    time.sleep(0.5)
+
+    robot_pantalla.press('enter')
+    time.sleep(0.5)
+
+    print("🤖 [RPA] Haciendo clic en Generar Archivo de Envío...")
+    robot_pantalla.click(x=743, y=642)
+    time.sleep(2)
+
+    
+    print("⏳ [RPA] Esperando la encriptación y generación del archivo de envío .dec...")
+    time.sleep(8) # Pausa larga para asegurar que Java cree el archivo físico .zip
+    
+    print("🤖 [RPA] Cerrando cuadro de diálogo final de éxito...")
+    robot_pantalla.press('enter')
+    time.sleep(1.5)
+    
+    print("🤖 [RPA] Cerrando la ventana del PDT PLAME (Alt + F4)...")
+    robot_pantalla.hotkey('alt', 'f4')
+    time.sleep(2)
+
+    
+    print("🤖 [RPA] confirmando el cierre del PDT Plame...")
+    robot_pantalla.press('enter')
+    time.sleep(1.5)
+
 
 
 
