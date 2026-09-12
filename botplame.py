@@ -334,16 +334,64 @@ def navegar_e_importar_planilla(ruc, periodo, rutas_archivos):
     robot_pantalla.click(x=569, y=429)
     time.sleep(3)
     
-    print("🤖 [RPA] Seleccionando la empresa actual en la lista...")
-    robot_pantalla.click(x=1375, y=397)
-    time.sleep(1.5)
+
+
+
+
+
+
+    print("🔍 [RPA] Localizando el icono del disquete en pantalla de forma dinámica...")
+    try:
+        # 🔑 LA SOLUCIÓN: Construye la ruta absoluta exacta donde se encuentra tu archivo botplame.py
+        ruta_script = os.path.dirname(os.path.abspath(__file__))
+        ruta_imagen_disquete = os.path.join(ruta_script, 'disquete.png')
+        
+        # Ahora el bot siempre encontrará la imagen sin importar desde qué consola lo lances
+        posicion_disquete = robot_pantalla.locateCenterOnScreen(ruta_imagen_disquete, confidence=0.8)
+
+        
+        if posicion_disquete is not None:
+            # Capturamos la coordenada X exacta en la que apareció el disquete
+            x_dinamico = posicion_disquete.x
+            
+            # Bajamos unos 35 píxeles en vertical (Eje Y) para posicionarnos sobre la primera fila de datos
+            y_fila_datos = posicion_disquete.y + 35
+            
+            print(f"🎯 [RPA] ¡Icono encontrado! Coordinando clic en la fila: ({x_dinamico}, {y_fila_datos})")
+            
+            # 1. Hace clic en el extremo derecho de la fila para seleccionar la empresa
+            robot_pantalla.click(x=x_dinamico, y=y_fila_datos)
+            time.sleep(1.5)
+            
+            print("🤖 [RPA] Activando casilla de verificación de la DDJJ...")
+            # 2. Mantiene la misma altura Y calculada, pero va al eje X fijo del check (731)
+            robot_pantalla.click(x=731, y=y_fila_datos)
+            time.sleep(1.5)
+        else:
+            raise Exception("No se encontró la imagen 'disquete.png' en la pantalla actual.")
+            
+    except Exception as e:
+        print(f"⚠️ [ALERTA] Falló la detección visual ({e}). Aplicando coordenadas de respaldo estáticas...")
+        # Tu plan B original si la pantalla cambia por completo o el archivo no existe
+        robot_pantalla.click(x=1393, y=399)
+        time.sleep(1.5)
+        robot_pantalla.click(x=731, y=550)
+        time.sleep(1.5)
+
+
+
+
+
+
+
+
     
-    print("🤖 [RPA] Activando casilla de verificación de la DDJJ...")
+    print("🤖 [RPA] Activando casilla de metodo de envio...")
     robot_pantalla.click(x=731, y=550)
     time.sleep(1.5)
   
     
-    print("🤖 [RPA] Haciendo clic en Generar Archivo de Envío...")
+    print("🤖 [RPA] Haciendo clic en examinar Archivo de Envío...")
     robot_pantalla.click(x=1329, y=614)
     time.sleep(2)
     
@@ -358,7 +406,7 @@ def navegar_e_importar_planilla(ruc, periodo, rutas_archivos):
 
     print("🤖 [RPA] Haciendo clic en Generar Archivo de Envío...")
     robot_pantalla.click(x=743, y=642)
-    time.sleep(2)
+    time.sleep(4)
 
     
     print("⏳ [RPA] Esperando la encriptación y generación del archivo de envío .dec...")
@@ -366,7 +414,11 @@ def navegar_e_importar_planilla(ruc, periodo, rutas_archivos):
     
     print("🤖 [RPA] Cerrando cuadro de diálogo final de éxito...")
     robot_pantalla.press('enter')
-    time.sleep(1.5)
+    time.sleep(2)
+
+    print("🤖 [RPA] Cerrando cuadro de diálogo final de éxito...")
+    robot_pantalla.press('enter')
+    time.sleep(2)
     
     print("🤖 [RPA] Cerrando la ventana del PDT PLAME (Alt + F4)...")
     robot_pantalla.hotkey('alt', 'f4')
