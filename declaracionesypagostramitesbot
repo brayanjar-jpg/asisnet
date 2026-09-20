@@ -1,0 +1,353 @@
+"""
+Bot de consulta de Declaraciones y Pagos (SUNAT) + Detalle de Tributos (NPS)
+Alimenta las tablas Supabase: declaraciones_pagos -> detalle_tributos_pagos
+
+Flujo:
+  1) Login SOL
+  2) Salto directo al módulo de Consulta de Declaraciones y Pagos (menú 12.8.1.1.2)
+  3) Segundo salto: consulta general (consultaS01Alias) con filtros de fecha
+  4) Extrae la grilla tblDetalleDeclPagos (con paginación) -> upsert en declaraciones_pagos
+  5) Para cada orden, pide el detalle real de pago (vpS01Alias, confirmado por el usuario)
+     -> insert en detalle_tributos_pagos (borra+reinserta por num_orden para ser idempotente)
+"""
+
+import asyncio
+import os
+import re
+import csv
+import urllib.parse
+from datetime import datetime
+from playwright.async_api import async_playwright
+from supabase import create_client, Client
+
+# =====================================================================
+# CONFIGURACIÓN
+# =====================================================================
+SUPABASE_URL = "https://atryivflkhjsynrqzora.supabase.co"
+
+# ⚠️ IMPORTANTE: usa la clave "service_role" (Project Settings > API en Supabase),
+# NO la "publishable"/anon — esa última choca con Row Level Security al insertar
+# desde un script de backend. La service_role SALTA las políticas RLS.
+# Mantenla secreta: no la subas a un repo público.
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cnlpdmZsa2hqc3lucnF6b3JhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Nzg3OTk1OSwiZXhwIjoyMTAzNDU1OTU5fQ.NF15t9InKLP4Iy6ooO0metP7x6q9t2uIci0eViQ93S4"
+
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+except Exception as e:
+    print(f"[ERROR] No se pudo conectar a Supabase: {e}")
+
+URL_LOGIN_SUNAT = (
+    "https://api-seguridad.sunat.gob.pe/v1/clientessol/4f3b88b3-d9d6-402a-b85d-6a0bc857746a/"
+    "oauth2/loginMenuSol?lang=es-PE&showDni=true&showLanguages=false&"
+    "originalUrl=https://e-menu.sunat.gob.pe/cl-ti-itmenu/AutenticaMenuInternet.htm&"
+    "state=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAADdAADZXhlcHQABnBhcmFtc3QASyomKiYvY2wtdGktaXRtZW51L01lbnVJbnRlcm5ldC5odG0mYjY0ZDI2YThiNWFmMDkxOTIzYjIzYjY0MDdhMWMxZGI0MWU3MzNhNnQABGV4ZWNweA=="
+)
+
+CARPETA_SALIDA = r"D:\sunat_consulta_declaraciones"
+if not os.path.exists(CARPETA_SALIDA):
+    os.makedirs(CARPETA_SALIDA)
+
+
+# =====================================================================
+# UTILIDADES
+# =====================================================================
+def _fecha_a_iso(fecha_ddmmaaaa: str):
+    """'01/06/2026' -> '2026-06-01' (formato date de Postgres). None si no matchea."""
+    try:
+        d, m, a = fecha_ddmmaaaa.strip().split("/")
+        return f"{a}-{m}-{d}"
+    except Exception:
+        return None
+
+
+def _indice_columna(headers, palabras_clave):
+    for i, h in enumerate(headers):
+        h_up = h.upper()
+        if any(p in h_up for p in palabras_clave):
+            return i
+    return None
+
+
+def _importe_a_float(valor: str):
+    try:
+        return float(valor.strip().replace(".", "").replace(",", "."))
+    except Exception:
+        return None
+
+
+# =====================================================================
+# PARTE 1: EXTRACCIÓN DE LA GRILLA PRINCIPAL (declaraciones y pagos)
+# =====================================================================
+async def extraer_declaraciones_pagos(page):
+    print(" [SCRAPING] Extrayendo tabla de declaraciones y pagos...")
+    await page.wait_for_selector("#tblDetalleDeclPagos", timeout=20000)
+
+    resultados = []
+    pagina_actual = 1
+
+    while True:
+        filas = await page.query_selector_all("#tblDetalleDeclPagos tbody tr")
+        print(f"   -> Página {pagina_actual}: {len(filas)} filas")
+
+        for fila in filas:
+            celdas = await fila.query_selector_all("td")
+            if len(celdas) < 10:
+                continue
+
+            resultados.append({
+                "periodo":            (await celdas[1].inner_text()).strip(),
+                "num_formulario":     (await celdas[2].inner_text()).strip(),
+                "num_orden":          (await celdas[3].inner_text()).strip(),
+                "descripcion":        (await celdas[4].inner_text()).strip(),
+                "fecha_presentacion": (await celdas[5].inner_text()).strip(),
+                "banco_receptor":     (await celdas[6].inner_text()).strip(),
+                "codigo_tributo":     (await celdas[7].inner_text()).strip(),
+                "importe_pagado":     (await celdas[9].inner_text()).strip(),
+            })
+
+        boton_siguiente = await page.query_selector("#tblDetalleDeclPagos_next")
+        if not boton_siguiente:
+            break
+        clases = await boton_siguiente.get_attribute("class") or ""
+        if "disabled" in clases:
+            break
+
+        await boton_siguiente.click()
+        await page.wait_for_timeout(1500)
+        pagina_actual += 1
+
+    print(f" [SCRAPING] Total de registros extraídos: {len(resultados)}")
+    return resultados
+
+
+async def guardar_declaraciones_supabase(ruc, registros):
+    """Upsert en declaraciones_pagos usando num_orden (UNIQUE) como llave."""
+    if not registros:
+        return []
+
+    filas = []
+    for r in registros:
+        filas.append({
+            "empresa_ruc": ruc,
+            "periodo": r["periodo"],
+            "num_formulario": r["num_formulario"],
+            "num_orden": r["num_orden"],
+            "descripcion_formulario": r["descripcion"],
+            "fecha_presentacion": _fecha_a_iso(r["fecha_presentacion"]),
+            "banco_receptor": r["banco_receptor"],
+        })
+
+    try:
+        resp = (
+            supabase.table("declaraciones_pagos")
+            .upsert(filas, on_conflict="num_orden")
+            .execute()
+        )
+        print(f" [SUPABASE] {len(resp.data)} filas en declaraciones_pagos.")
+        return resp.data
+    except Exception as e:
+        print(f" [ERROR-SUPABASE] declaraciones_pagos: {e}")
+        return []
+
+
+# =====================================================================
+# PARTE 2: DETALLE DE PAGO POR ORDEN (confirmado: vpS01Alias)
+# =====================================================================
+def construir_url_detalle_pago(ruc, registro):
+    """
+    CONFIRMADA por el usuario y por capturas reales: es la misma URL que ya
+    usaba en producción desde Visual FoxPro para ver el detalle de cada pago.
+    https://ww1.sunat.gob.pe/cl-ti-itveripagformul/vpS01Alias
+        ?accion=consulta&ruc=...&formulario=...&tipnro=01&nroorden=...
+    """
+    params = {
+        "accion": "consulta",
+        "ruc": ruc,
+        "formulario": registro["num_formulario"],
+        "tipnro": "01",
+        "nroorden": registro["num_orden"],
+    }
+    query = urllib.parse.urlencode(params)
+    return f"https://ww1.sunat.gob.pe/cl-ti-itveripagformul/vpS01Alias?{query}"
+
+
+async def extraer_detalle_pago(page):
+    """
+    Extrae la tabla tblVeriPagoRptaUno: Casilla | Codigo - Descripción del Tributo | Importe.
+    Confirmado con capturas reales — el código y la descripción vienen juntos en una
+    sola celda separados por guion (ej. '1011-IGV - OPER. INT. - CTA. PROPIA'),
+    y el importe usa PUNTO decimal aquí (a diferencia de la grilla principal, que usa coma).
+    """
+    await page.wait_for_selector("#tblVeriPagoRptaUno", timeout=15000)
+
+    resultados = []
+    while True:
+        filas = await page.query_selector_all("#tblVeriPagoRptaUno tbody tr")
+        for fila in filas:
+            celdas = await fila.query_selector_all("td")
+            if len(celdas) < 3:
+                continue  # fila "Ningún dato disponible en esta tabla" (colspan=3, 1 sola td)
+
+            casilla = (await celdas[0].inner_text()).strip()
+            codigo_desc = (await celdas[1].inner_text()).strip()
+            importe_txt = (await celdas[2].inner_text()).strip()
+
+            if "-" in codigo_desc:
+                codigo, descripcion = codigo_desc.split("-", 1)
+                codigo, descripcion = codigo.strip(), descripcion.strip()
+            else:
+                codigo, descripcion = codigo_desc, None
+
+            try:
+                importe = float(importe_txt)
+            except Exception:
+                importe = None
+
+            resultados.append({
+                "casilla": casilla,
+                "codigo_tributo": codigo,
+                "descripcion_tributo": descripcion,
+                "importe": importe,
+            })
+
+        boton_siguiente = await page.query_selector("#tblVeriPagoRptaUno_next")
+        if not boton_siguiente:
+            break
+        clases = await boton_siguiente.get_attribute("class") or ""
+        if "disabled" in clases:
+            break
+        await boton_siguiente.click()
+        await page.wait_for_timeout(1000)
+
+    return resultados
+
+
+async def procesar_detalle_pago(page, ruc, registro, guardar_diagnostico=False):
+    url = construir_url_detalle_pago(ruc, registro)
+    await page.goto(url, timeout=30000)
+    await page.wait_for_timeout(1500)
+
+    if guardar_diagnostico:
+        ruta_html = os.path.join(CARPETA_SALIDA, f"detalle_pago_{registro['num_orden']}.html")
+        with open(ruta_html, "w", encoding="utf-8") as f:
+            f.write(await page.content())
+        print(f" [DIAGNÓSTICO] Guardado {ruta_html} (referencia de respaldo).")
+
+    return await extraer_detalle_pago(page)
+
+
+async def guardar_detalle_tributos_supabase(num_orden, filas_detalle):
+    """
+    detalle_tributos_pagos no tiene unique constraint más allá de 'id', así que
+    para que correr el bot varias veces no duplique, borramos el detalle previo
+    de ese num_orden y volvemos a insertar.
+    """
+    if not filas_detalle:
+        return
+    for fila in filas_detalle:
+        fila["num_orden"] = num_orden
+    try:
+        supabase.table("detalle_tributos_pagos").delete().eq("num_orden", num_orden).execute()
+        resp = supabase.table("detalle_tributos_pagos").insert(filas_detalle).execute()
+        print(f"   [SUPABASE] {len(resp.data)} fila(s) de detalle para orden {num_orden}.")
+    except Exception as e:
+        print(f"   [ERROR-SUPABASE] detalle_tributos_pagos (orden {num_orden}): {e}")
+
+
+# =====================================================================
+# ORQUESTADOR POR EMPRESA
+# =====================================================================
+async def procesar_consulta_declaraciones(ruc, usuario, clave, browser,
+                                           fecha_ini="01/01/2026", fecha_fin="01/01/2026"):
+    print(f"\n [IA-CONSULTA] Iniciando consulta de declaraciones para RUC: {ruc}")
+    context = await browser.new_context(accept_downloads=True)
+    page = await context.new_page()
+
+    try:
+        # 1) LOGIN
+        print(" [SOL-LOGIN] Abriendo formulario SUNAT...")
+        await page.goto(URL_LOGIN_SUNAT, timeout=45000)
+        await page.wait_for_timeout(2000)
+        await page.click("#btnPorRuc")
+        await page.wait_for_timeout(500)
+        await page.fill("#txtRuc", ruc)
+        await page.fill("#txtUsuario", usuario)
+        await page.fill("#txtContrasena", clave)
+        print(" [SOL-LOGIN] Enviando credenciales...")
+        await page.click("#btnAceptar")
+        await page.wait_for_timeout(5000)
+
+        # 2) PRIMER SALTO: módulo de Consulta de declaraciones y pagos
+        url_menu = "https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?action=execute&code=12.8.1.1.2&s=ww1"
+        print(" [SALTO-1] Ejecutando salto directo al módulo de consulta...")
+        await page.goto(url_menu, timeout=45000)
+        await page.wait_for_timeout(3000)
+
+        # 3) SEGUNDO SALTO: consulta general con filtros de fecha
+        fec_ini_enc = urllib.parse.quote(fecha_ini, safe="")
+        fec_fin_enc = urllib.parse.quote(fecha_fin, safe="")
+        url_detalle = (
+            "https://ww1.sunat.gob.pe/cl-ti-itconsdecdetinf/consultaS01Alias"
+            "?busquedapor=fecha&accion=consultageneral&declaracion=1&formu2=TODOS"
+            "&importepagado=1&mdesde=00&adesde=00&mhasta=00&ahasta=00"
+            f"&fec_preini={fec_ini_enc}&fec_prefin={fec_fin_enc}"
+        )
+        print(" [SALTO-2] Solicitando el detalle de declaraciones...")
+        await page.goto(url_detalle, timeout=45000)
+        await page.wait_for_timeout(4000)
+
+        # 4) GRILLA PRINCIPAL -> declaraciones_pagos
+        registros = await extraer_declaraciones_pagos(page)
+        await guardar_declaraciones_supabase(ruc, registros)
+
+        # Respaldo CSV de la grilla principal
+        if registros:
+            ruta_csv = os.path.join(CARPETA_SALIDA, f"declaraciones_{ruc}.csv")
+            with open(ruta_csv, "w", newline="", encoding="utf-8-sig") as f:
+                writer = csv.DictWriter(f, fieldnames=registros[0].keys())
+                writer.writeheader()
+                writer.writerows(registros)
+            print(f" [CSV] Guardado: {ruta_csv}")
+
+        # 5) DETALLE DE PAGO POR ORDEN -> detalle_tributos_pagos
+        print(f" [DETALLE] Procesando el detalle de {len(registros)} órdenes...")
+        for i, registro in enumerate(registros):
+            es_la_primera = (i == 0)  # guardamos un HTML de referencia solo de la primera
+            detalle = await procesar_detalle_pago(page, ruc, registro, guardar_diagnostico=es_la_primera)
+            await guardar_detalle_tributos_supabase(registro["num_orden"], detalle)
+            await page.wait_for_timeout(700)
+
+        return registros
+
+    except Exception as e:
+        print(f" [ERROR-PROCESO] Falló la consulta para RUC {ruc}: {e}")
+        return []
+    finally:
+        await page.close()
+        await context.close()
+
+
+# =====================================================================
+# PUNTO DE ARRANQUE
+# =====================================================================
+async def run(ruc, usuario, clave, fecha_ini="22/11/2025", fecha_fin="30/11/2025"):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=False,  # ponlo en True una vez confirmes que el detalle de tributos sale bien
+            args=["--start-maximized", "--disable-blink-features=AutomationControlled"]
+        )
+        await procesar_consulta_declaraciones(ruc, usuario, clave, browser, fecha_ini, fecha_fin)
+        await browser.close()
+
+
+if __name__ == "__main__":
+    try:
+        print("[SISTEMA] Encendiendo motores del Bot asíncrono...")
+        asyncio.run(run("20607765422", "HOUSTBOL", "Fanning1215",
+                        fecha_ini="22/11/2025", fecha_fin="30/11/2025"))
+    except KeyboardInterrupt:
+        print("\n[SISTEMA] Bot apagado manualmente.")
+    except Exception as error_global:
+        print(f"\n[ALERTA GLOBAL]: {error_global}")
+        import traceback
+        traceback.print_exc()
