@@ -1,240 +1,533 @@
 <body>
+<div class="container"><!-- container para iphone -->
+
+<!-- panel detalle de declaraciones y pagos -->
+	<br>
+	<div class="row">
+		<div class="col-xs-1 col-md-1 col-sm-1"></div>
+		<div class="col-xs-10 col-md-10 col-sm-10">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h4 class="text-center title">DETALLE DE DECLARACIONES Y PAGOS</h4>
+				</div>
+				<div class="panel-body contenidoAndBtn">
+					
+					<div class="row">
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">RUC</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">10703846144 </div>
+							</div>
+						</div>
+						<div class="col-xs-12 col-md-2 col-sm-2"></div>
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">FECHA</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">20/09/2026 </div>
+							</div>	
+						</div>					
+					</div>
+					
+					<div class="row">
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">NOMBRE O RAZON SOCIAL</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">QUISPE SUAREZ BRAYAN JAROLL                                                                          </div>
+							</div>
+						</div>
+						<div class="col-xs-12 col-md-2 col-sm-2"></div>
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">ORDENADO POR</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">PERIODO </div>
+							</div>
+						</div>					
+					</div>
+					
+					<div class="row">
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">DESDE</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">01/06/2026  </div>
+							</div>
+						</div>
+						<div class="col-xs-12 col-md-2 col-sm-2"></div>
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">HASTA</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">01/06/2026 </div>
+							</div>
+						</div>					
+					</div>
+					
+					<div class="row">
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">								
+								<div class="col-xs-5 col-md-5 col-sm-5">FORMULARIO</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5"> TODOS  </div>								
+							</div>
+						</div>
+						<div class="col-xs-12 col-md-2 col-sm-2"></div>
+						<div class="col-xs-12 col-md-5 col-sm-5">
+							<div class="row">
+								<div class="col-xs-5 col-md-5 col-sm-5">IMPORTE PAGADO</div>
+								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
+								<div class="col-xs-5 col-md-5 col-sm-5">MAYOR A CERO  </div>
+							</div>
+						</div>					
+					</div>
+										
 
 
-    <form name="aspnetForm" method="post" action="./Afil_Consulta.aspx" id="aspnetForm">
-<div>
-<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
-<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
-<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJNjUwMDExMTA2D2QWAmYPZBYCAgMPZBYCAgEPZBYGAgEPDxYCHgdWaXNpYmxlaGQWBAIBD2QWDAIBDxBkZBYBZmQCBw8PFgIeBFRleHQFCDcwMzg0NjE0ZGQCDw8PFgIfAQUGcXVpc3BlZGQCFw8PFgIfAQUGc3VhcmV6ZGQCHw8PFgIfAQUGYnJheWFuZGQCJw8PFgIfAQUGamFyb2xsZGQCAw9kFgICAQ8PFgIfAWVkZAIDDw8WAh8AZ2QWBAIBDw8WAh8AZ2QWEAIBDw8WAh8BBSVJbmZvcm1hY2nDs24gYWwgOiAwNS8wOS8yMDI2IDIzOjQ0OjI4ZGQCAw8PFgIfAQUKMjEvMDYvMjAxNGRkAgUPDxYCHwEFB0hhYml0YXRkZAIHDw8WAh8BBQwzMzI5MzFCUVNTUjZkZAIJDw8WAh8BBQhBZmlsaWFkb2RkAgsPDxYCHwEFBzA1LzIwMjNkZAINDw8WAh8BBTtBQ1RJVk8sIHNlZ8O6biBsb3MgZGF0b3MgcXVlIGFwYXJlY2VuIGVuIGxhIHBhcnRlIHN1cGVyaW9yLmRkAg8PDxYCHwEFkgVEZSBhY3VlcmRvIGEgbGEgaW5mb3JtYWNpw7NuIHByb3BvcmNpb25hZGEgcG9yIGxhIEFGUCwgZHVyYW50ZSBsb3Mgw7psdGltb3Mgc2VpcyAoNikgbWVzZXMgZWwgYWZpbGlhZG8gbm8gcmVnaXN0cmEgYXBvcnRlcyBvYmxpZ2F0b3Jpb3MsIG1vdGl2byBwb3IgZWwgY3VhbCBzaSBlbCBhZmlsaWFkbyB0aWVuZSBsYSBjb25kaWNpw7NuIGRlIHRyYWJhamFkb3IgZGVwZW5kaWVudGUgeSBsZSBoYW4gZXN0YWRvIGVmZWN0dWFuZG8gbGFzIHJldGVuY2lvbmVzIGNvcnJlc3BvbmRpZW50ZXMgbywgc2kgdGllbmUgbGEgY29uZGljacOzbiBkZSBpbmRlcGVuZGllbnRlIHkgaGEgdmVuaWRvIHBhZ2FuZG8gc3VzIGFwb3J0ZXMgb2JsaWdhdG9yaW9zLCBzZXLDrWEgY29udmVuaWVudGUgc2UgcG9uZ2EgZW4gY29udGFjdG8gY29uIGxhIEFGUCBwYXJhIGRldGVybWluYXIgbGEgc2l0dWFjacOzbiBkZSBsb3MgcmVmZXJpZG9zIGFwb3J0ZXMuPGJyPjxicj5SZWN1ZXJkZSBxdWUgbG9zIGFwb3J0ZXMgYWNyZWRpdGFkb3MgcmVzdWx0YW4gbmVjZXNhcmlvcyBwYXJhIGVmZWN0b3MgZGUgbGEgZXZhbHVhY2nDs24gZGUgbGEgY29iZXJ0dXJhIGRlbCBzZWd1cm8gcHJldmlzaW9uYWwgYW50ZSB1bmEgY29udGluZ2VuY2lhIGRlIGludmFsaWRleiBvIGZhbGxlY2ltaWVudG8uZGQCAw8PFgIfAGdkZAIFD2QWAgIBD2QWAgI/DxBkZBYBZmRkmJXNpb058i5Hcc43bs73WNGSTcEIm7ong0g8afQqKCs=">
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-1 col-md-1 col-sm-1"></div>
+
+	</div>		
+	
+	<!-- panel con tabla de respuesta -->			
+		
+
+</div><!-- fin del container para iphone -->
+		
+		<div class="container" id="container2">		
+		
+		<form name="frmDescargarFormulario" method="post">
+		<input type="hidden" name="accion" value="descargarFormulario">
+		<div class="row">
+			<div class="col-xs-1 col-md-1 col-sm-1"></div>
+			<div class="col-xs-10 col-md-10 col-sm-10">
+					<div class="row">
+			<div class="col-xs-12 col-md-12 col-sm-12">
+				<div class="table-responsive">
+				  <div id="tblDetalleDeclPagos_wrapper" class="dataTables_wrapper no-footer"><table id="tblDetalleDeclPagos" class="table table-hover table-bordered tableFont dataTable no-footer" role="grid">
+				    <thead>
+				    		<tr class="text-center" role="row"><th class="sorting_asc" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-sort="ascending" aria-label=": Activar para ordenar la columna de manera descendente" style="width: 0.4px;"></th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 44.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Periodo: Activar para ordenar la columna de manera ascendente">Periodo</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 35.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="N° Form: Activar para ordenar la columna de manera ascendente">N° Form</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 46.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="N° Orden: Activar para ordenar la columna de manera ascendente">N° Orden</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 85.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Descripción: Activar para ordenar la columna de manera ascendente">Descripción</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 57.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Fecha de Pres.: Activar para ordenar la columna de manera ascendente">Fecha de Pres.</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 93.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Banco Receptor: Activar para ordenar la columna de manera ascendente">Banco Receptor</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 58.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Codigo-Tributo: Activar para ordenar la columna de manera ascendente">Codigo-Tributo</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 89.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Descripción: Activar para ordenar la columna de manera ascendente">Descripción</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 58.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Importe pagado: Activar para ordenar la columna de manera ascendente">Importe pagado</th></tr>
+				    </thead>
+				    <tbody>						
+				
+				    <tr role="row" class="odd">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545839</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545839')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="even">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545857</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545857')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="odd">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545866</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545866')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="even">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545877</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545877')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="odd">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545889</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545889')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="even">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545981</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545981')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="odd">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228545995</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228545995')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="even">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228546069</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228546069')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="odd">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228546086</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228546086')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr><tr role="row" class="even">
+					   
+										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
+										
+						  	<td class="bg">202601</td>
+						  	<td class="bg">1663</td>
+						  	<td class="bg">228546105</td>
+						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
+						  	<td class="bg">01/06/2026</td>
+						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
+						  	<td class="bg">-</td>
+						  	<td class="bg">
+						  		
+						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
+						  				'10703846144',
+						  				'1663',
+						  				'01',
+						  				'228546105')">
+						  				Detalle de Tributos Pagados</a>
+						  				
+						  		 		
+						  	</td>
+						  	<td class="bg" align="right">1,00</td>
+						  </tr></tbody>
+				  </table><div class="dataTables_paginate paging_simple_numbers" id="tblDetalleDeclPagos_paginate"><a class="paginate_button previous disabled" aria-controls="tblDetalleDeclPagos" data-dt-idx="0" tabindex="0" id="tblDetalleDeclPagos_previous">&lt; Anterior</a><span><a class="paginate_button current" aria-controls="tblDetalleDeclPagos" data-dt-idx="1" tabindex="0">1</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="2" tabindex="0">2</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="3" tabindex="0">3</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="4" tabindex="0">4</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="5" tabindex="0">5</a><span class="ellipsis">…</span><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="6" tabindex="0">25</a></span><a class="paginate_button next" aria-controls="tblDetalleDeclPagos" data-dt-idx="7" tabindex="0" id="tblDetalleDeclPagos_next">Siguiente &gt;</a></div></div>
+				
+				</div>
+			</div>
+		</div>
+			
+			
+			
+			</div>
+			<div class="col-xs-1 col-md-1 col-sm-1"></div>
+		
+		</div>	
+		</form>
+			</div>
+			
+		<div class="container">
+		
+<!-- observaciones -->		
+		<div class="row">
+			<div class="col-xs-1 col-md-1 col-sm-1"></div>
+			<div class="col-xs-10 col-md-10 col-sm-10 contenidoAndBtn">
+				<strong>OBSERVACIONES</strong><br>
+-El asterisco(*) señala a los formularios pagados con cheque que fue rechazado.<br>
+-Considera declaraciones efectuadas mediante el Programa de Declaración Telemática(PDT) y pagos realizados por Pago Fácil ó Declaración Simplificada.<br>
+-Los pagos efectuados mediante&nbsp;Pago Fácil, registran como número de orden, un número asignado por SUNAT, el cual es distinto al número de operación bancaria consignada en la constancia de pago que entrega el banco receptor.<br>
+-De existir alguna omisión o no estar de acuerdo con la información detallada en la consulta, deberá comunicarse con los Centros de Atención o las Areas de Servicios al Contribuyente de su dependencia.<br>
+			</div>
+			<div class="col-xs-1 col-md-1 col-sm-1"></div>
+		</div>
+		
+<!-- botones y enviar mail -->	
+		
+	<div class="row" style="margin-top:20px;">
+			<div class="col-xs-1 col-md-1 col-sm-1"></div>
+			<div class="col-xs-10 col-md-10 col-sm-10">
+				<div class="row" style="border-top:1px solid #3379b8;padding-top: 10px;">
+					<div class="col-sm-4">
+						<form id="descargar" name="descargar" method="post" action="/cl-ti-itconsdecdetinf/consultaS02Alias">
+						     <input type="submit" class="btn btn-primary btn-block contenidoAndBtn" style="margin-top:15px;" value="Descargar reporte de declaraciones y pagos" name="DR">
+						     <input type="Hidden" value="generaReporte" name="accion">
+					    </form> 
+					</div>
+					<div class="col-sm-2">
+					
+						<form id="frmexportarexcel" name="frmexportarexcel" method="post" action="/cl-ti-itconsdecdetinf/consultaS01Alias">		  			
+				  			<input type="submit" class="btn btn-success btn-block contenidoAndBtn" style="margin-top:15px;" value="Exportar a excel" name="DR">
+				  			<input type="hidden" value="exportarExcel" name="accion">		  			
+			  			</form>	
+			  		
+			  		
+					</div>
+					<div class="col-sm-4">
+						
+					</div>
+					<!--<div class="col-xs-12 col-sm-1">&nbsp;</div> -->
+					<div class="col-sm-2">
+							<form id="formRetornar" method="post">
+								<input type="button" id="btnAnteriorPedido" name="btnAnteriorPedido" class="btn btn-danger btn-block" style="margin-top:15px;" value="Anterior">									
+								<input type="hidden" id="accion" name="accion">
+							</form>	
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-1 col-md-1 col-sm-1"></div>
+	</div>
+	<div class="row" style="margin-top:25px;">
+			<div class="col-xs-1 col-sm-4"></div>
+			<div class="col-xs-10 col-sm-4">
+				<form id="frmenviaremail" name="frmenviaremail" method="post" role="form">
+					<input type="hidden" name="accion" value="enviarEmail">
+					<input type="hidden" name="pantalla" value="Det">
+					<div class="form-group">
+					    <div class="input-group">					      
+					      <div class="input-group-addon">Ingrese E-mail :</div>		
+					      <input type="text" id="email" name="email" class="form-control" size="25">
+					      <button class="form-control" id="enviarMail" name="enviarMail" onclick="return validaEmail();">
+					      	Enviar
+						  </button>	
+					    </div>
+					</div>							  			
+		  		</form>
+			</div>
+			<div class="col-xs-1 col-sm-4"></div>
+	</div>
+	
+<form class="form-horizontal" role="form" method="POST" name="form03" action="/cl-ti-itconsdecdetinf" id="form03">
+		<input type="hidden" name="accion" id="accion" value="descargaReporte">
+</form>
+				
+<form name="verDetalleForm" method="get" action="/cl-ti-itveripagformul/vpS01Alias">
+	<input type="hidden" name="accion" value="consulta">
+	<input type="hidden" name="ruc" value="">
+	<input type="hidden" name="formulario" value="">
+	<input type="hidden" name="tipnro" value="01">
+	<input type="hidden" name="nroorden" value="">	
+	<input type="hidden" name="CallProg" value="vpS01Alias">
+	<input type="hidden" name="param1" value="">
+	<input type="hidden" name="param2" value="">
+	<input type="hidden" name="param3" value="">
+	<input type="hidden" name="param4" value="">
+	<input type="hidden" name="z" value="">
+	<input type="hidden" name="urlRETORNO" value="">
+</form>
+
+<form name="frmConsultaDetalleCasillas" method="get" action="/cl-ti-itconsdecdetinf/consultaS01Alias">
+	<input type="hidden" name="accion" value="consultaDetalleCasillas">
+	<input type="hidden" name="titulo" value="">
+	<input type="hidden" name="num_ruc" value="">
+	<input type="hidden" name="periodo" value="">
+	<input type="hidden" name="formulario" value="">
+	<input type="hidden" name="norden" value="">
+	<input type="hidden" name="descrip" value="">
+	<input type="hidden" name="fch_presenta" value="">
+	<input type="hidden" name="banco" value="">
+	<input type="hidden" name="importe" value="">		
+	<input type="hidden" name="urlRETORNO" value="">
+</form>
+
+<div id="divModalPopup" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <div class="modal-header bg-danger">
+	                <button type="button" class="close" data-dismiss="modal">×</button>
+	                <h4 class="modal-title" id="modalEliminarItemLabel">Alerta</h4>
+	            </div>
+	            <div class="modal-body">
+	                <div class="row">
+	                    <div class="col-sm-12 ">
+	                    	<div class="text-center">
+	                    		<p id="divPopupMensaje"></p>
+	                    	</div>
+	                    </div>
+	                </div>
+	            </div>
+	            <div class="modal-footer">
+		            <div class="col-xs-4 col-sm-4"></div>
+		            <div class="col-xs-4 col-sm-4">
+		                	<button type="button" style="width: 100%;" class="btn btn-secondary" data-dismiss="modal">Aceptar</button>
+		            </div>
+		            <div class="col-xs-4 col-sm-4"></div>
+	        	</div>
+	    </div>
+	</div>
+</div>
 </div>
 
-<script type="text/javascript">
-//<![CDATA[
-var theForm = document.forms['aspnetForm'];
-if (!theForm) {
-    theForm = document.aspnetForm;
+
+<script>
+function descargarExcel(url){
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.responseType = 'blob';
+	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+	xhr.send();
+	xhr.onload = function(e) {
+	    if (this.status == 200) {
+	    	var filenameHeader =  xhr.getResponseHeader('Content-Disposition');	    	
+	    	var filename = filenameHeader.split("=");
+	        var blob = new Blob([this.response], {type: 'application/vnd.ms-excel'});
+	        var downloadUrl = URL.createObjectURL(blob);
+	        var a = document.createElement("a");
+	        a.href = downloadUrl;
+	        a.target = '_blank'; 
+	        a.download = filename[1];
+	        document.body.appendChild(a);
+	        a.click();
+	    } else {
+	        alert('No se puede cargar excel.')	
+	    }
+	};	
+	
 }
-function __doPostBack(eventTarget, eventArgument) {
-    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
-        theForm.__EVENTTARGET.value = eventTarget;
-        theForm.__EVENTARGUMENT.value = eventArgument;
-        theForm.submit();
-    }
-}
-//]]>
+
 </script>
 
 
-<script src="/ReporteSituacionPrevisional/WebResource.axd?d=_tiIPfY16VqrfcbvsbdI9eV_NP1ca5Dhvbf2AyMKl5Sw9HBgkChfwyO_0KtKkCZqx70dOT03kwZW6wI-JIRspCj4SF-KQk_IJanVl13CNcQ1&amp;t=638901361900000000" type="text/javascript"></script>
-
-<div>
-
-	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="B976FAEF">
-	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAPNhH+ovxhG3cY5Wwoj5U0ntynDXHbH735+Qey5FxAvAj8jzSvVBlyk5hFsDOQMxCxqdbzkh8Z26aICvMoZl4jrDFHEdR5qPomvkQmt8F9qpA==">
-</div>
-        <div>
-            
-    <script type="text/javascript">
-
-        function Imprimir() {
-            window.print();
-            //$("#btnTerminar").fadeIn();
-        }
-        function btnImprimir_onclick() {
-
-        }
-
-    </script>
-
-    
-    <script>
-        DoLoad();
-    </script>
-
-    <div id="ctl00_ContentPlaceHolder1_pnlConfirmar" style="height:598px;width:782px;">
-	
-        <table border="0" cellspacing="4" cellpadding="4">
-            <tbody><tr class="APLI_titulo">
-                <td colspan="4" style="border-bottom: 1px solid gray; width: 767px; height: 24px;">
-                    <div align="left" style="width: 770px">
-                        <strong>REPORTE DE SITUACIÓN PREVISIONAL EN EL SISTEMA PRIVADO DE PENSIONES
-                        </strong><b>:</b>
-                    </div>
-                </td>
-            </tr>
-        </tbody></table>
-        <div id="ctl00_ContentPlaceHolder1_pnlImprimesup">
-		
-            <table width="100%" border="0" cellspacing="2" cellpadding="0">
-                <tbody><tr class="JERF_texto2">
-                    <td style="text-align: left; color: #2174e5">
-                        <b>Información al:</b>
-                    </td>
-                    <td style="height: 19px; text-align: right; width: 496px;"><b>
-                        <span id="ctl00_ContentPlaceHolder1_lblFechaReg">Información al : 05/09/2026 23:44:28</span></b></td>
-                </tr>
-                <tr class="JERF_texto2">
-                    <td style="height: 19px; text-align: left; width: 496px; color: #2174e5"><b>Estimado usuario:
-                    </b></td>
-                </tr>
-                <tr class="JERF_texto2">
-                    <td style="height: 19px; text-align: left; width: 496px; color: #2174e5" colspan="2"><b>Como resultado de la consulta realizada a través del Portal Web, se ha determinado lo siguiente:
-                    </b></td>
-                </tr>
-               
-               
-               
-            </tbody></table>
-
-            <table width="100%" border="0" cellspacing="2" cellpadding="0" style="margin-right: 0px">
-                <tbody><tr class="JERF_texto2">
-                    <td style="text-align: left; color: #2174e5"><b>Se encuentra afiliado(a) al SPP desde el </b></td>
-                    <td align="right">
-                        <span id="ctl00_ContentPlaceHolder1_lblFec_ing">21/06/2014</span></td>
-                </tr>
-                <tr class="JERF_texto2">
-                    <td style="text-align: left; color: #2174e5"><b>Actualmente se encuentra afiliado(a) a </b></td>
-                    <td align="right">
-                        <span id="ctl00_ContentPlaceHolder1_lblAfp_act">Habitat</span></td>
-                </tr>
-                
-                
-                
-               
-                <tr class="JERF_texto2">
-                    <td class="" style="text-align: left; color: #2174e5"><b>Su Código de Identificación del SPP es </b></td>
-                    <td align="right">
-                        <span id="ctl00_ContentPlaceHolder1_lblCod_afi">332931BQSSR6</span></td>
-                </tr>
-                <tr class="JERF_texto2">
-                    <td style="text-align: left; color: #2174e5"><b>Su situación actual es</b> </td>
-                    <td align="right">
-                        <span id="ctl00_ContentPlaceHolder1_lblSituacion">Afiliado</span></td>
-                </tr>
-                
-                
-                
-                <tr class="JERF_texto2">
-                    <td style="text-align: left; height: 20px; width: 43%; color: #2174e5"><b>La fecha de devengue de su último aporte es </b></td>
-                    <td align="right" style="height: 20px">
-                        <span id="ctl00_ContentPlaceHolder1_lblFec_dev">05/2023</span></td>
-                </tr>
-
-                
-
-                
-                
-                
-
-                
-
-                <tr>
-                    <td colspan="9" style="height: 24px">
-                        <div style="border: 1px  solid gray; width: 772px; padding: 3px;">
-                            <table cellpadding="0" cellspacing="0" border="0">
-                                <tbody><tr class="APLI_txtContenido">
-                                    <td colspan="9" class="APLI_titulo" align="center" style="color: #2174E5; text-align: center; height: 24px; width: 775px;">M U Y &nbsp;&nbsp; I M P O R T A N T E</td>
-                                </tr>
-                                <tr class="APLI_txtContenido">
-                                    <td colspan="9" class="JERF_texto2" style="text-align: left; width: 775px; text-decoration: underline; color: #2174e5">Situación del Afiliado </td>
-                                </tr>
-                                <tr class="APLI_txtContenido">
-                                    <td colspan="9" class="JERF_texto2" align="justify" style="width: 775px">
-                                        <div style="text-align: justify;">
-                                            <span id="ctl00_ContentPlaceHolder1_TxtBoxSit_Det">ACTIVO, según los datos que aparecen en la parte superior.</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="APLI_txtContenido">
-                                    <td style="width: 775px">&nbsp;</td>
-                                </tr>
-                                <tr class="APLI_txtContenido">
-                                    <td colspan="9" class="JERF_texto2" style="text-align: left; text-decoration: underline; color: #2174e5; width: 775px;">Aportes Obligatorios </td>
-                                </tr>
-                                <tr class="APLI_txtContenido">
-                                    <td colspan="9" class="JERF_texto2" align="justify" style="width: 775px">
-                                        <div style="text-align: justify;">
-                                            <span id="ctl00_ContentPlaceHolder1_TxtBoxApor_Obl">De acuerdo a la información proporcionada por la AFP, durante los últimos seis (6) meses el afiliado no registra aportes obligatorios, motivo por el cual si el afiliado tiene la condición de trabajador dependiente y le han estado efectuando las retenciones correspondientes o, si tiene la condición de independiente y ha venido pagando sus aportes obligatorios, sería conveniente se ponga en contacto con la AFP para determinar la situación de los referidos aportes.<br><br>Recuerde que los aportes acreditados resultan necesarios para efectos de la evaluación de la cobertura del seguro previsional ante una contingencia de invalidez o fallecimiento.</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody></table>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="APLI_txtContenido" style="vertical-align: middle">
-                    <td class="" colspan="9" style="color: #F00; text-align: justify">En caso tuviera dudas con relación al presente documento, sirvase contactar a la Superintendencia al teléfono gratuito a nivel nacional : 0800-10840.
-                    </td>
-                </tr>
-            </tbody></table>
-        
-	</div>
-        <div id="ctl00_ContentPlaceHolder1_pnlImprimeinf">
-		
-            <div id="ctl00_ContentPlaceHolder1_pnlCorredorImprime">
-			
-                
-                    <div id="DivContacto" class="visible-only-screen">
-                        <table style="width: 779px; height: 90px">
-                            <tbody><tr class="APLI_txtContenido">
-                                <td>
-                                    <input type="hidden" name="numdoc" value=""></td>
-                            </tr>
-                            <tr class="APLI_txtContenido">
-                                <td class="APLI_enlace" style="text-align: center; width: 520px">
-                                    <div style="display: inline; vertical-align: top">
-                                        <u>Si usted desea que la AFP se ponga en contacto con usted, hacer click</u>
-                                        <input type="submit" name="ctl00$ContentPlaceHolder1$btnFormulario" value="  Aquí  " onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$btnFormulario&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ContentPlaceHolder1_btnFormulario" class="APLI_boton" style="width: 60px; vertical-align: middle; color: White; background-color: #2174E5; border-color: #2174E5; border-radius: .21428571em;">
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="APLI_txtContenido">
-                                <td>&nbsp;</td>
-                            </tr>
-
-                        </tbody></table>
-                    </div>
-                
-                <table border="0" cellspacing="2" cellpadding="0">
-                    <tbody><tr class="APLI_txtContenido">
-                        <td colspan="2" style="width: 775px; text-align: right">
-                            <input type="submit" name="ctl00$ContentPlaceHolder1$btnOtro_Registro" value="  Consultar otro registro  " onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ContentPlaceHolder1$btnOtro_Registro&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ContentPlaceHolder1_btnOtro_Registro" class="APLI_boton" style="color: White; background-color: #2174E5; border-color: #2174E5; border-radius: .21428571em;">
-                            &nbsp;&nbsp;
-                                                 <input id="btnImprimir" type="button" value="  Imprimir  " class="APLI_boton" onclick="Imprimir()" style="color: White; background-color: #2174E5; border-color: #2174E5; border-radius: .21428571em;">&nbsp;&nbsp; 
-
-                        </td>
-                    </tr>
-                </tbody></table>
-            
-		</div>
-        
-	</div>
-
-    
-</div>
+<script src="/a/js/apps/workspace/ws.js"></script>
 
 
-    
-
-
-
-
- 
-                        
-              
-             
-                                
-                              
-                           
-                            
-
-
-    
-
-
-        </div></form>
-    
-
-
-
-</body>
+<script id="f5_cspm">(function(){var f5_cspm={f5_p:'LPJNEAFGJOFKGBCDLFLGIANLCHJOLOONINADBOFAMOIHLGAPMBDHHLELPIBPOJGJCJFBODAKBENKMHKADBAABPEMAGALGFIJHCGKEOEGLONLNDJDCBOPFLBJLGCBADNM',setCharAt:function(str,index,chr){if(index>str.length-1)return str;return str.substr(0,index)+chr+str.substr(index+1);},get_byte:function(str,i){var s=(i/16)|0;i=(i&15);s=s*32;return((str.charCodeAt(i+16+s)-65)<<4)|(str.charCodeAt(i+s)-65);},set_byte:function(str,i,b){var s=(i/16)|0;i=(i&15);s=s*32;str=f5_cspm.setCharAt(str,(i+16+s),String.fromCharCode((b>>4)+65));str=f5_cspm.setCharAt(str,(i+s),String.fromCharCode((b&15)+65));return str;},set_latency:function(str,latency){latency=latency&0xffff;str=f5_cspm.set_byte(str,40,(latency>>8));str=f5_cspm.set_byte(str,41,(latency&0xff));str=f5_cspm.set_byte(str,35,2);return str;},wait_perf_data:function(){try{var wp=window.performance.timing;if(wp.loadEventEnd>0){var res=wp.loadEventEnd-wp.navigationStart;if(res<60001){var cookie_val=f5_cspm.set_latency(f5_cspm.f5_p,res);window.document.cookie='f5avr2118791389aaaaaaaaaaaaaaaa_cspm_='+encodeURIComponent(cookie_val)+';path=/;'+'';}
+return;}}
+catch(err){return;}
+setTimeout(f5_cspm.wait_perf_data,100);return;},go:function(){var chunk=window.document.cookie.split(/\s*;\s*/);for(var i=0;i<chunk.length;++i){var pair=chunk[i].split(/\s*=\s*/);if(pair[0]=='f5_cspm'&&pair[1]=='1234')
+{var d=new Date();d.setTime(d.getTime()-1000);window.document.cookie='f5_cspm=;expires='+d.toUTCString()+';path=/;'+';';setTimeout(f5_cspm.wait_perf_data,100);}}}}
+f5_cspm.go();}());</script></body>
