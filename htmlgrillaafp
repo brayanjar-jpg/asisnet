@@ -1,533 +1,114 @@
-<body>
-<div class="container"><!-- container para iphone -->
-
-<!-- panel detalle de declaraciones y pagos -->
-	<br>
-	<div class="row">
-		<div class="col-xs-1 col-md-1 col-sm-1"></div>
-		<div class="col-xs-10 col-md-10 col-sm-10">
-			<div class="panel panel-primary">
-				<div class="panel-heading">
-					<h4 class="text-center title">DETALLE DE DECLARACIONES Y PAGOS</h4>
-				</div>
-				<div class="panel-body contenidoAndBtn">
-					
-					<div class="row">
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">RUC</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">10703846144 </div>
+<form id="formulario" class="form-horizontal form-group-xs" novalidate="novalidate">
+                     <div class="form-group formulario-tipo-devolucion">
+                        <div class="col-sm-4">
+                           <label for="tipoDevolucion" class="control-label">Tipo de Solicitud de Devolución</label> 
+                        </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                              <select id="tipoSolicitud" name="tipoSolicitud" class="form-control">
+                                 
+                              <option value="">--SELECCIONE--</option><option value="02" data-0="[object Object]">02 DEVOLUCION PAGO INDEBIDO O EN EXCESO</option><option value="03" data-0="[object Object]">03 DEVOLUC. MTO. NO UTILIZADO DOC. CANC. TESO.PUBLICO</option><option value="06" data-0="[object Object]">06 DEVOLUC. ADQUISICIONES CON DONACIONES DEL EXTERIOR</option><option value="23" data-0="[object Object]">23 DEVOL. DE PROVEEDORES REG. DE RETEN. NO APLICADAS</option><option value="26" data-0="[object Object]">26 DEVOLUCION DE PERCEPCIONES NO APLICADAS DEL IGV</option><option value="28" data-0="[object Object]">28 PERCEPCION-SUJETOS NO AFECTOS AL IGV-NUEVO RUS</option><option value="29" data-0="[object Object]">29 PERCEPCION-IMPORTACIONES-SUJETOS NO AFECTOS AL IGV</option><option value="35" data-0="[object Object]">35 ISC TRANSPORTISTA</option><option value="36" data-0="[object Object]">36 RECUPERACIÓN ANTICIPADA DEL IGV -REMYPE</option><option value="40" data-0="[object Object]">40 RENTAS DE TRABAJO - SALDO ADICIONAL</option><option value="41" data-0="[object Object]">41 IMPUESTO A LA VENTA DE ARROZ PILADO - IVAP</option><option value="43" data-0="[object Object]">43 REINTEGRO TRIBUTARIO - ACUICULTURA</option><option value="44" data-0="[object Object]">44 REINTEGRO TRIBUTARIO - AGRICULTURA</option></select>
+                              <span class="input-group-addon help" data-hasqtip="0">
+                                 <span class="glyphicon glyphicon-question-sign"></span>
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group formulario-tributo">
+                        <div class="col-sm-4">
+                           <label for="tributo" class="control-label">Tributo</label>
+                        </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                              <select id="tributo" name="tributo" class="form-control"></select>
+                              <span class="input-group-addon help" data-hasqtip="1">
+                                 <span class="glyphicon glyphicon-question-sign"></span>
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group formulario-periodo-tributario">
+                        <div class="col-sm-4">
+                           <label for="periodoDocumento" class="control-label">Periodo Tributario</label>
+                        </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                              <input id="periodoDocumento" name="periodoDocumento" placeholder="AAAAMM" class="form-control">
+                              <span class="input-group-addon help" data-hasqtip="2">
+                                 <span class="glyphicon glyphicon-question-sign"></span>
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group formulario-sustento" style="display: none;">
+                        <div class="col-sm-4">
+                           <label for="formularioSustento" class="control-label">Formulario Sustento</label>
+                        </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                              <select id="formularioSustento" name="formularioSustento" class="form-control"></select>
+                              <span class="input-group-addon help" data-hasqtip="3">
+                                 <span class="glyphicon glyphicon-question-sign"></span>
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group formulario-sustento" style="display: none;">
+                        <div class="col-sm-4">
+                           <label for="ordenSustento" class="control-label">Número Orden</label>
+                        </div>
+                        <div class="col-sm-8">
+                           <div class="input-group">
+                              <input id="ordenSustento" name="ordenSustento" class="form-control">
+                              <span class="input-group-addon help" data-hasqtip="4">
+                                 <span class="glyphicon glyphicon-question-sign"></span>
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                  	<div class="form-group formulario-lc col-md-12" style="display: none;">
+                     	<fieldset>
+							<legend>Liquidación de Cobranza</legend>
+							<div class="form-group col-md-12">
+								<div class="col-sm-6 col-md-6">
+						            <label for="numeroSerie" class="control-label">Número Serie</label>
+						            <div class="input-group">
+						                <input id="numeroSerie" name="numeroSerie" class="form-control" maxlength="3">
+						                <span class="input-group-addon help" data-hasqtip="5">
+						                    <span class="glyphicon glyphicon-question-sign"></span>
+						                </span>
+						            </div>
+						        </div>
+						        <div class="col-sm-6 col-md-6">
+						            <label for="numero" class="control-label">Número</label>
+						            <div class="input-group">
+		                             <input id="numero" name="numero" class="form-control" maxlength="6">
+		                              <span class="input-group-addon help" data-hasqtip="6">
+		                                 <span class="glyphicon glyphicon-question-sign"></span>
+		                              </span>
+		                           </div>
+						        </div>
 							</div>
-						</div>
-						<div class="col-xs-12 col-md-2 col-sm-2"></div>
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">FECHA</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">20/09/2026 </div>
-							</div>	
-						</div>					
-					</div>
-					
-					<div class="row">
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">NOMBRE O RAZON SOCIAL</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">QUISPE SUAREZ BRAYAN JAROLL                                                                          </div>
-							</div>
-						</div>
-						<div class="col-xs-12 col-md-2 col-sm-2"></div>
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">ORDENADO POR</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">PERIODO </div>
-							</div>
-						</div>					
-					</div>
-					
-					<div class="row">
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">DESDE</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">01/06/2026  </div>
-							</div>
-						</div>
-						<div class="col-xs-12 col-md-2 col-sm-2"></div>
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">HASTA</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">01/06/2026 </div>
-							</div>
-						</div>					
-					</div>
-					
-					<div class="row">
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">								
-								<div class="col-xs-5 col-md-5 col-sm-5">FORMULARIO</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5"> TODOS  </div>								
-							</div>
-						</div>
-						<div class="col-xs-12 col-md-2 col-sm-2"></div>
-						<div class="col-xs-12 col-md-5 col-sm-5">
-							<div class="row">
-								<div class="col-xs-5 col-md-5 col-sm-5">IMPORTE PAGADO</div>
-								<div class="col-xs-2 col-md-2 col-sm-2">:</div>
-								<div class="col-xs-5 col-md-5 col-sm-5">MAYOR A CERO  </div>
-							</div>
-						</div>					
-					</div>
-										
-
-
-				</div>
-			</div>
-		</div>
-		<div class="col-xs-1 col-md-1 col-sm-1"></div>
-
-	</div>		
-	
-	<!-- panel con tabla de respuesta -->			
-		
-
-</div><!-- fin del container para iphone -->
-		
-		<div class="container" id="container2">		
-		
-		<form name="frmDescargarFormulario" method="post">
-		<input type="hidden" name="accion" value="descargarFormulario">
-		<div class="row">
-			<div class="col-xs-1 col-md-1 col-sm-1"></div>
-			<div class="col-xs-10 col-md-10 col-sm-10">
-					<div class="row">
-			<div class="col-xs-12 col-md-12 col-sm-12">
-				<div class="table-responsive">
-				  <div id="tblDetalleDeclPagos_wrapper" class="dataTables_wrapper no-footer"><table id="tblDetalleDeclPagos" class="table table-hover table-bordered tableFont dataTable no-footer" role="grid">
-				    <thead>
-				    		<tr class="text-center" role="row"><th class="sorting_asc" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-sort="ascending" aria-label=": Activar para ordenar la columna de manera descendente" style="width: 0.4px;"></th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 44.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Periodo: Activar para ordenar la columna de manera ascendente">Periodo</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 35.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="N° Form: Activar para ordenar la columna de manera ascendente">N° Form</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 46.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="N° Orden: Activar para ordenar la columna de manera ascendente">N° Orden</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 85.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Descripción: Activar para ordenar la columna de manera ascendente">Descripción</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 57.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Fecha de Pres.: Activar para ordenar la columna de manera ascendente">Fecha de Pres.</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 93.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Banco Receptor: Activar para ordenar la columna de manera ascendente">Banco Receptor</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 58.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Codigo-Tributo: Activar para ordenar la columna de manera ascendente">Codigo-Tributo</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 89.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Descripción: Activar para ordenar la columna de manera ascendente">Descripción</th><th style="padding-top: 10px; padding-bottom: 10px; text-align: center; vertical-align: middle; width: 58.4px;" class="sorting" tabindex="0" aria-controls="tblDetalleDeclPagos" rowspan="1" colspan="1" aria-label="Importe pagado: Activar para ordenar la columna de manera ascendente">Importe pagado</th></tr>
-				    </thead>
-				    <tbody>						
-				
-				    <tr role="row" class="odd">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545839</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545839')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="even">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545857</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545857')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="odd">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545866</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545866')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="even">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545877</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545877')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="odd">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545889</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545889')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="even">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545981</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545981')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="odd">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228545995</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228545995')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="even">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228546069</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228546069')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="odd">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228546086</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228546086')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr><tr role="row" class="even">
-					   
-										<td class="bg sorting_1">&nbsp;&nbsp;&nbsp;</td>
-										
-						  	<td class="bg">202601</td>
-						  	<td class="bg">1663</td>
-						  	<td class="bg">228546105</td>
-						  	<td class="bg">BOLETA DE PAGO - NPS                    </td>
-						  	<td class="bg">01/06/2026</td>
-						  	<td class="bg">BBVA BANCO CONTINENTAL    </td>
-						  	<td class="bg">-</td>
-						  	<td class="bg">
-						  		
-						  				<a href="javascript:verDetalleTributos('Detalle de Tributos Pagados',
-						  				'10703846144',
-						  				'1663',
-						  				'01',
-						  				'228546105')">
-						  				Detalle de Tributos Pagados</a>
-						  				
-						  		 		
-						  	</td>
-						  	<td class="bg" align="right">1,00</td>
-						  </tr></tbody>
-				  </table><div class="dataTables_paginate paging_simple_numbers" id="tblDetalleDeclPagos_paginate"><a class="paginate_button previous disabled" aria-controls="tblDetalleDeclPagos" data-dt-idx="0" tabindex="0" id="tblDetalleDeclPagos_previous">&lt; Anterior</a><span><a class="paginate_button current" aria-controls="tblDetalleDeclPagos" data-dt-idx="1" tabindex="0">1</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="2" tabindex="0">2</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="3" tabindex="0">3</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="4" tabindex="0">4</a><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="5" tabindex="0">5</a><span class="ellipsis">…</span><a class="paginate_button " aria-controls="tblDetalleDeclPagos" data-dt-idx="6" tabindex="0">25</a></span><a class="paginate_button next" aria-controls="tblDetalleDeclPagos" data-dt-idx="7" tabindex="0" id="tblDetalleDeclPagos_next">Siguiente &gt;</a></div></div>
-				
-				</div>
-			</div>
-		</div>
-			
-			
-			
-			</div>
-			<div class="col-xs-1 col-md-1 col-sm-1"></div>
-		
-		</div>	
-		</form>
-			</div>
-			
-		<div class="container">
-		
-<!-- observaciones -->		
-		<div class="row">
-			<div class="col-xs-1 col-md-1 col-sm-1"></div>
-			<div class="col-xs-10 col-md-10 col-sm-10 contenidoAndBtn">
-				<strong>OBSERVACIONES</strong><br>
--El asterisco(*) señala a los formularios pagados con cheque que fue rechazado.<br>
--Considera declaraciones efectuadas mediante el Programa de Declaración Telemática(PDT) y pagos realizados por Pago Fácil ó Declaración Simplificada.<br>
--Los pagos efectuados mediante&nbsp;Pago Fácil, registran como número de orden, un número asignado por SUNAT, el cual es distinto al número de operación bancaria consignada en la constancia de pago que entrega el banco receptor.<br>
--De existir alguna omisión o no estar de acuerdo con la información detallada en la consulta, deberá comunicarse con los Centros de Atención o las Areas de Servicios al Contribuyente de su dependencia.<br>
-			</div>
-			<div class="col-xs-1 col-md-1 col-sm-1"></div>
-		</div>
-		
-<!-- botones y enviar mail -->	
-		
-	<div class="row" style="margin-top:20px;">
-			<div class="col-xs-1 col-md-1 col-sm-1"></div>
-			<div class="col-xs-10 col-md-10 col-sm-10">
-				<div class="row" style="border-top:1px solid #3379b8;padding-top: 10px;">
-					<div class="col-sm-4">
-						<form id="descargar" name="descargar" method="post" action="/cl-ti-itconsdecdetinf/consultaS02Alias">
-						     <input type="submit" class="btn btn-primary btn-block contenidoAndBtn" style="margin-top:15px;" value="Descargar reporte de declaraciones y pagos" name="DR">
-						     <input type="Hidden" value="generaReporte" name="accion">
-					    </form> 
-					</div>
-					<div class="col-sm-2">
-					
-						<form id="frmexportarexcel" name="frmexportarexcel" method="post" action="/cl-ti-itconsdecdetinf/consultaS01Alias">		  			
-				  			<input type="submit" class="btn btn-success btn-block contenidoAndBtn" style="margin-top:15px;" value="Exportar a excel" name="DR">
-				  			<input type="hidden" value="exportarExcel" name="accion">		  			
-			  			</form>	
-			  		
-			  		
-					</div>
-					<div class="col-sm-4">
-						
-					</div>
-					<!--<div class="col-xs-12 col-sm-1">&nbsp;</div> -->
-					<div class="col-sm-2">
-							<form id="formRetornar" method="post">
-								<input type="button" id="btnAnteriorPedido" name="btnAnteriorPedido" class="btn btn-danger btn-block" style="margin-top:15px;" value="Anterior">									
-								<input type="hidden" id="accion" name="accion">
-							</form>	
-					</div>
-				</div>
-			</div>
-			<div class="col-xs-1 col-md-1 col-sm-1"></div>
-	</div>
-	<div class="row" style="margin-top:25px;">
-			<div class="col-xs-1 col-sm-4"></div>
-			<div class="col-xs-10 col-sm-4">
-				<form id="frmenviaremail" name="frmenviaremail" method="post" role="form">
-					<input type="hidden" name="accion" value="enviarEmail">
-					<input type="hidden" name="pantalla" value="Det">
-					<div class="form-group">
-					    <div class="input-group">					      
-					      <div class="input-group-addon">Ingrese E-mail :</div>		
-					      <input type="text" id="email" name="email" class="form-control" size="25">
-					      <button class="form-control" id="enviarMail" name="enviarMail" onclick="return validaEmail();">
-					      	Enviar
-						  </button>	
-					    </div>
-					</div>							  			
-		  		</form>
-			</div>
-			<div class="col-xs-1 col-sm-4"></div>
-	</div>
-	
-<form class="form-horizontal" role="form" method="POST" name="form03" action="/cl-ti-itconsdecdetinf" id="form03">
-		<input type="hidden" name="accion" id="accion" value="descargaReporte">
-</form>
-				
-<form name="verDetalleForm" method="get" action="/cl-ti-itveripagformul/vpS01Alias">
-	<input type="hidden" name="accion" value="consulta">
-	<input type="hidden" name="ruc" value="">
-	<input type="hidden" name="formulario" value="">
-	<input type="hidden" name="tipnro" value="01">
-	<input type="hidden" name="nroorden" value="">	
-	<input type="hidden" name="CallProg" value="vpS01Alias">
-	<input type="hidden" name="param1" value="">
-	<input type="hidden" name="param2" value="">
-	<input type="hidden" name="param3" value="">
-	<input type="hidden" name="param4" value="">
-	<input type="hidden" name="z" value="">
-	<input type="hidden" name="urlRETORNO" value="">
-</form>
-
-<form name="frmConsultaDetalleCasillas" method="get" action="/cl-ti-itconsdecdetinf/consultaS01Alias">
-	<input type="hidden" name="accion" value="consultaDetalleCasillas">
-	<input type="hidden" name="titulo" value="">
-	<input type="hidden" name="num_ruc" value="">
-	<input type="hidden" name="periodo" value="">
-	<input type="hidden" name="formulario" value="">
-	<input type="hidden" name="norden" value="">
-	<input type="hidden" name="descrip" value="">
-	<input type="hidden" name="fch_presenta" value="">
-	<input type="hidden" name="banco" value="">
-	<input type="hidden" name="importe" value="">		
-	<input type="hidden" name="urlRETORNO" value="">
-</form>
-
-<div id="divModalPopup" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog" role="document">
-	        <div class="modal-content">
-	            <div class="modal-header bg-danger">
-	                <button type="button" class="close" data-dismiss="modal">×</button>
-	                <h4 class="modal-title" id="modalEliminarItemLabel">Alerta</h4>
-	            </div>
-	            <div class="modal-body">
-	                <div class="row">
-	                    <div class="col-sm-12 ">
-	                    	<div class="text-center">
-	                    		<p id="divPopupMensaje"></p>
-	                    	</div>
-	                    </div>
-	                </div>
-	            </div>
-	            <div class="modal-footer">
-		            <div class="col-xs-4 col-sm-4"></div>
-		            <div class="col-xs-4 col-sm-4">
-		                	<button type="button" style="width: 100%;" class="btn btn-secondary" data-dismiss="modal">Aceptar</button>
-		            </div>
-		            <div class="col-xs-4 col-sm-4"></div>
-	        	</div>
-	    </div>
-	</div>
-</div>
-</div>
-
-
-<script>
-function descargarExcel(url){
-	
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', url, true);
-	xhr.responseType = 'blob';
-	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-	xhr.send();
-	xhr.onload = function(e) {
-	    if (this.status == 200) {
-	    	var filenameHeader =  xhr.getResponseHeader('Content-Disposition');	    	
-	    	var filename = filenameHeader.split("=");
-	        var blob = new Blob([this.response], {type: 'application/vnd.ms-excel'});
-	        var downloadUrl = URL.createObjectURL(blob);
-	        var a = document.createElement("a");
-	        a.href = downloadUrl;
-	        a.target = '_blank'; 
-	        a.download = filename[1];
-	        document.body.appendChild(a);
-	        a.click();
-	    } else {
-	        alert('No se puede cargar excel.')	
-	    }
-	};	
-	
-}
-
-</script>
-
-
-<script src="/a/js/apps/workspace/ws.js"></script>
-
-
-<script id="f5_cspm">(function(){var f5_cspm={f5_p:'LPJNEAFGJOFKGBCDLFLGIANLCHJOLOONINADBOFAMOIHLGAPMBDHHLELPIBPOJGJCJFBODAKBENKMHKADBAABPEMAGALGFIJHCGKEOEGLONLNDJDCBOPFLBJLGCBADNM',setCharAt:function(str,index,chr){if(index>str.length-1)return str;return str.substr(0,index)+chr+str.substr(index+1);},get_byte:function(str,i){var s=(i/16)|0;i=(i&15);s=s*32;return((str.charCodeAt(i+16+s)-65)<<4)|(str.charCodeAt(i+s)-65);},set_byte:function(str,i,b){var s=(i/16)|0;i=(i&15);s=s*32;str=f5_cspm.setCharAt(str,(i+16+s),String.fromCharCode((b>>4)+65));str=f5_cspm.setCharAt(str,(i+s),String.fromCharCode((b&15)+65));return str;},set_latency:function(str,latency){latency=latency&0xffff;str=f5_cspm.set_byte(str,40,(latency>>8));str=f5_cspm.set_byte(str,41,(latency&0xff));str=f5_cspm.set_byte(str,35,2);return str;},wait_perf_data:function(){try{var wp=window.performance.timing;if(wp.loadEventEnd>0){var res=wp.loadEventEnd-wp.navigationStart;if(res<60001){var cookie_val=f5_cspm.set_latency(f5_cspm.f5_p,res);window.document.cookie='f5avr2118791389aaaaaaaaaaaaaaaa_cspm_='+encodeURIComponent(cookie_val)+';path=/;'+'';}
-return;}}
-catch(err){return;}
-setTimeout(f5_cspm.wait_perf_data,100);return;},go:function(){var chunk=window.document.cookie.split(/\s*;\s*/);for(var i=0;i<chunk.length;++i){var pair=chunk[i].split(/\s*=\s*/);if(pair[0]=='f5_cspm'&&pair[1]=='1234')
-{var d=new Date();d.setTime(d.getTime()-1000);window.document.cookie='f5_cspm=;expires='+d.toUTCString()+';path=/;'+';';setTimeout(f5_cspm.wait_perf_data,100);}}}}
-f5_cspm.go();}());</script></body>
+							<div class="form-group col-md-12">
+						        <div class="col-sm-6 col-md-6">
+						            <label for="ano" class="control-label">Año</label>
+						            <div class="input-group">
+		                              <input id="ano" name="ano" class="form-control">
+		                              <span class="input-group-addon help" data-hasqtip="7">
+		                                 <span class="glyphicon glyphicon-question-sign"></span>
+		                              </span>
+		                           </div>
+						        </div>
+						    </div>
+                        </fieldset>
+                  </div>
+                  <div class="checkbox datos-adicionales" style="display: none;">
+                        <div class="col-sm-4"></div>
+                        <div class="col-sm-8">
+                           <label>
+                              <input id="datosAdicionales" name="datosAdicionales" type="checkbox"> <span>etiquetaDatosAdicionales</span>
+                           </label>
+                        </div>
+                   </div>
+                     <button class="btn btn-primary pull-right" id="btnContinuar">Continuar</button>
+                   </form>
