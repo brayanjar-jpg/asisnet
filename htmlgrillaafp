@@ -1,343 +1,360 @@
-<html><head>
+<?xml version="1.0"?>
 
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Constancia de Presentación Solicitud de Devolución 1649</title>
-<link href="/a/js/libs/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"><link href="/a/css/general/bootstrap-datetimepicker-3.1.4.min.css" rel="stylesheet"><link href="/a/js/libs/bootstrap/3.3.2/plugins/datatables-1.10.7/media/css/jquery.dataTables.min.css" rel="stylesheet"><link href="/a/css/general/jquery.validate.min.css" rel="stylesheet"><link href="/a/css/fpe/select.dataTables.min.css" rel="stylesheet"><link href="/a/css/general/general.css" rel="stylesheet" type="text/css" media="screen"><link href="/a/css/general/common.css" rel="stylesheet"><link href="/a/css/general/jquery.qtip.min.css" rel="stylesheet"><link href="/a/css/general/estilos.css" rel="stylesheet"><!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries --><!-- WARNING: Respond.js doesn't work if you view the page via file:// --><!--[if lt IE 9]><script src="/a/js/libs/bootstrap/3.3.2/plugins/html5shiv/3.7.2/html5shiv.min.js"></script><script src="/a/js/libs/bootstrap/3.3.2/plugins/respond/1.4.2/respond.min.js"></script><![endif]-->
-
-<style type="text/css">
-@page {
-  min-width: 768px;
-}
-@media print {
-    html {
-    font-size: 10px;
-    margin: 0;
-    padding 0 !important;
-  }
-  body {
-    font-size: 10px;
-    margin: 0;
-    padding 0 !important;
-  }
-  .container .form-control, .container h3, .input-group-addon {
-   font-size: 10px;
-  }
-  h3, .panel-title, h1, .h1 {
-   padding: 0px;
-  }
-  .panel-heading{
-    padding: 2px;
-  }
-  .form-group {
-    margin: 0px;
-    padding: 0px;
-  }
-  .form-horizontal .control-label {
-    padding-top: 0px;
-    margin-bottom: 0;
-    text-align: right;
-    vertical-align: middle;
-    display:table-cell;
-  }
-  .container, .form-control, label, input, .input-group-addon {
-    height: 20px;
-    margin: 0px;
-    padding: 0px;
-    border: none;
-    color: #000000;
-    background-color: #ffffff;
-  }
-  .input-group-addon {
-    padding-right: 5px
-  }
-  .container {
-    width: auto;
-    display: inline;
-  }
-  .thHeadBlue {
-  	text-align: center !important;
-  	color: #ffffff !important;
-    background-color: #337ab7 !important;
-    border-color: #337ab7 !important;
-   }
-}
-</style>
-</head>
-<body>
-
-<div class="section">
-   <div class="container">
-      <div class="row">
-         <h4 class="col-xs-12 text-center text-primary">Constancia de Presentación Solicitud de Devolución 1649</h4>
-      </div>
-      <div class="row">
-         <div class="col-xs-12">
-            <form id="formConstancia" role="form" class="form-horizontal" action="/ol-ti-itdevolucion-registro/MostrarConstancia.htm" method="post">
-               <div class="panel panel-primary">
-                  <div class="panel-heading">
-                     <h3 class="panel-title">Datos Generales de la Solicitud de Devolución</h3>
-                  </div>
-                  <div class="panel-body">
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="numDocumento">NÚMERO ORDEN SOLICITUD</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.numDocumento" name="solicitudDevolucion.numDocumento" class="form-control" readonly="readonly" type="text" value="36866924">
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="documentoConstancia.value">REGISTRO ÚNICO DE CONTRIBUYENTE</label> </div>
-                        <div class="col-xs-8">
-                          <input id="solicitudDevolucion.documentoConstancia.value" name="solicitudDevolucion.documentoConstancia.value" class="form-control" readonly="readonly" type="text" value="20607765422">
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="contribuyente.desRazonSocial">APELLIDOS Y NOMBRES / RAZÓN SOCIAL</label> </div>
-                        <div class="col-xs-8">
-                          <input id="solicitudDevolucion.contribuyente.desRazonSocial" name="solicitudDevolucion.contribuyente.desRazonSocial" class="form-control" readonly="readonly" type="text" value="RAQUIEL E.I.R.L.">
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="numTelefono">TELÉFONO</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.numTelefono" name="solicitudDevolucion.numTelefono" class="form-control" readonly="readonly" type="text" value="9192970321"> 
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="tipoSolicitud.name">TIPO DE SOLICITUD DE DEVOLUCIÓN</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.tipoSolicitud.name" name="solicitudDevolucion.tipoSolicitud.name" class="form-control" readonly="readonly" type="text" value="02 DEVOLUCION PAGO INDEBIDO O EN EXCESO">
-                           <input id="solicitudDevolucion.tipoSolicitud.value" name="solicitudDevolucion.tipoSolicitud.value" class="form-control" readonly="true" type="hidden" value="02">
-                           <input id="solicitudDevolucion.tipoSolicitud.name" name="solicitudDevolucion.tipoSolicitud.name" class="form-control" readonly="true" type="hidden" value="02 DEVOLUCION PAGO INDEBIDO O EN EXCESO">
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="tributo.name">TRIBUTO</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.tributo.name" name="solicitudDevolucion.tributo.name" class="form-control" readonly="readonly" type="text" value="1011 IGV - OPER. INT. - CTA. PROPIA (IGVICP)">
-                           <input id="solicitudDevolucion.tributo.value" name="solicitudDevolucion.tributo.value" class="form-control" readonly="true" type="hidden" value="010101">
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="perDocumento">PERIODO TRIBUTARIO</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.perDocumento" name="solicitudDevolucion.perDocumento" class="form-control" readonly="readonly" type="text" value="202503">
-                        </div>
-                     </div>
-
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="formularioSustento.formulario">FORMULARIO SUSTENTO</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.formularioSustento.formulario.name" name="solicitudDevolucion.formularioSustento.formulario.name" class="form-control" readonly="readonly" type="text" value="1663   BOLETA DE PAGO - NPS">
-                           <input id="solicitudDevolucion.formularioSustento.formulario.value" name="solicitudDevolucion.formularioSustento.formulario.value" class="form-control" readonly="true" type="hidden" value="1663">
-                           <input id="solicitudDevolucion.formularioSustento.formulario.name" name="solicitudDevolucion.formularioSustento.formulario.name" class="form-control" readonly="true" type="hidden" value="1663   BOLETA DE PAGO - NPS">
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="formularioSustento.numOrden">NÚMERO DE ORDEN SUSTENTO</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.formularioSustento.numOrden" name="solicitudDevolucion.formularioSustento.numOrden" class="form-control" readonly="readonly" type="text" value="224601943">
-                        </div>
-                     </div>
-
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="formaDevolucion.value">FORMA DEVOLUCIÓN</label> </div>
-                        <div class="col-xs-8">
-                           <input id="solicitudDevolucion.formaDevolucion.name" name="solicitudDevolucion.formaDevolucion.name" class="form-control" readonly="readonly" type="text" value="Abono en cuenta">
-                           <input id="solicitudDevolucion.formaDevolucion.value" name="solicitudDevolucion.formaDevolucion.value" class="form-control" readonly="true" type="hidden" value="4">
-                        </div>
-                     </div>
-                     
-                        <div class="form-group">
-                           <div class="col-xs-4">
-                              <label class="control-label" for="cuentaInterbancaria.codCuenta">CÓDIGO CUENTA INTERBANCARIO</label> 
-                           </div>
-                           <div class="col-xs-8">
-                              <input id="solicitudDevolucion.cuentaInterbancaria.codCuenta" name="solicitudDevolucion.cuentaInterbancaria.codCuenta" class="form-control" readonly="readonly" type="text" value="00219100174201905050">
-                           </div>
-                        </div>
-                     
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="mtoSolicitado">IMPORTE SOLICITADO</label> </div>
-                        <div class="col-xs-8">
-                           <div class="input-group">
-                              <span class="input-group-addon">S/</span>
-                              <input id="solicitudDevolucion.mtoSolicitado" name="solicitudDevolucion.mtoSolicitado" class="form-control" readonly="readonly" type="text" value="3.00">
-                          </div>
-                        </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="fecDocumento">FECHA PRESENTACIÓN</label> </div>
-                         <div class="col-xs-8">
-                           <input id="solicitudDevolucion.fecDocumento" name="solicitudDevolucion.fecDocumento" class="form-control" readonly="readonly" type="text" value="20/09/2026"> </div>
-                     </div>
-                     <div class="form-group">
-                        <div class="col-xs-4"> <label class="control-label" for="codArchivoSustento">ARCHIVO SUSTENTO</label> </div>
-                        <div class="col-xs-8">
-                        
-                           <input id="solicitudDevolucion.indPresentoArchivoSustento" name="solicitudDevolucion.indPresentoArchivoSustento" value="SI" class="form-control" readonly="readonly" type="text">
-                        
-                        
-                           <input id="solicitudDevolucion.codArchivoSustento" name="solicitudDevolucion.codArchivoSustento" type="hidden" value="1131691286">
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               
-               
-               
-               <div class="panel panel-primary">
-                  <div class="panel-heading">
-                     <h3 class="panel-title">Archivo Adjunto</h3>
-                  </div>
-                  <div class="panel-body">
-                     <br>
-                     <table class="table table-bordered">
-                        <thead>
-                           <tr class="thHeadBlue">
-                              <th style="text-align: center !important;">Número de Archivo</th>
-                              <th style="text-align: center !important;">Nombre del Archivo</th>
-                              <th style="text-align: center !important;">Tamaño del Archivo <br>(MB)</th>
-                              <th style="text-align: center !important;">Folios</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           
-                              <tr>
-                                 <td align="center">3686692401</td>
-                                 <td align="center">constancia_NPS_224601943.pdf</td>
-                                 <td align="center">0.06</td>
-                                 <td align="center">1</td> 
-                              </tr>
-                           
-                        </tbody>
-                     </table>
-                  </div>
-               </div>
-               
-               
-               
-               <div id="desEscritoFundamentado" class="panel panel-primary">
-                  <div class="panel-heading">
-                     <h3 class="panel-title">Escrito Fundamentado</h3>
-                  </div>
-                  <div class="panel-body">
-                     <input id="solicitudDevolucion.desEscritoFundamentado" name="solicitudDevolucion.desEscritoFundamentado" type="hidden" value="Yo RAQUIEL E.I.R.L., identificado con RUC 20607765422 solicito la devolución del tributo 1011 IGV - OPER. INT. - CTA. PROPIA (IGVICP) correspondiente al periodo 202503 por el monto de S/ 3.00 por el motivo siguiente: Pago indebido o en exceso correspondiente al tributo solicitado como devolución.">
-                     <p class="form-control" style="height:auto">Yo RAQUIEL E.I.R.L., identificado con RUC 20607765422 solicito la devolución del tributo 1011 IGV - OPER. INT. - CTA. PROPIA (IGVICP) correspondiente al periodo 202503 por el monto de S/ 3.00 por el motivo siguiente: Pago indebido o en exceso correspondiente al tributo solicitado como devolución. </p>
-                  </div>
-               </div>
-               
-            </form>
-               
-            <div class="panel panel-primary">
-               <div class="panel-heading">
-                  <h3 class="panel-title">Información Importante</h3>
-               </div>
-               <div class="panel-body">
-                  Sr. Contribuyente, durante la atención de su solicitud de devolución, le sugerimos tener en cuenta lo siguiente:
-                  <ul>
-                     <li>Revisar periódicamente el Buzón Electrónico de su clave SOL, pues podría enviársele información respecto al estado de su solicitud.</li>
-                     <li>No dar baja definitiva a su RUC en tanto su solicitud se encuentre pendiente de atención.</li>
-                     <li>Mantener la condición de su domicilio fiscal como "HABIDO".</li>
-                     <li>No presentar una solicitud de compensación por un pago indebido o en exceso que ha sido solicitado en devolución.</li>
-                     
-	      	               <li>El MONTO SOLICITADO será depositado a la cuenta especificada en su Código de Cuenta Interbancario – CCI.</li>
-	                     <li>En caso de haber problemas en el depósito o no ser válido el CCI, se modificará automáticamente la forma de devolución a
-	                     
-	                     
-	                     Cheque.
-                        
-	                     </li>
-                     
-                     
-                     
-                  </ul>Finalmente, le recordamos que el trámite de devolución es gratuito.
-               </div>
-            </div>
-               
-            <div class="section hidden-print">
-               <div class="container">
-                  <div class="row">
-                     <div class="col-xs-3">
-                        <button id="btnImprimir" type="submit" class="btn btn-primary">Imprimir constancia</button>
-                     </div>
-                     <div class="col-xs-9">
-                        <form id="formEnviarCorreo" class="form-horizontal" role="form" novalidate="novalidate">
-	                        <div class="form-group">
-	                           <div class="col-xs-3">
-	                              <label class="control-label" for="correo">Enviar correo</label>
-	                           </div>
-	                           <div class="col-xs-6">
-	                              <input type="text" class="form-control" id="correo" name="correo" placeholder="Correo Electrónico">
-	                           </div>
-	                           <div class="col-xs-2">
-	                              <button id="btnEnviar" type="submit" class="btn btn-primary">Enviar</button>
-	                           </div>
-	                        </div>
-                        </form>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
-</div>
-   
-   
-<script src="/a/js/libs/jquery/1.11.2/jquery.min.js"></script><script src="/a/js/libs/bootstrap/3.3.2/js/bootstrap.min.js"></script><script src="/a/js/general/bootstrap-filestyle.min.js"></script><script src="/a/js/libs/bootstrap/3.3.2/plugins/jquery.inputmask-3.1/dist/jquery.inputmask.bundle.min.js"></script><script src="/a/js/libs/bootstrap/3.3.2/plugins/jquery-validation-1.13.1/dist/jquery.validate.min.js"></script><script src="/a/js/libs/bootstrap/3.3.2/plugins/jquery-validation-1.13.1/dist/additional-methods.min.js"></script><script src="/a/js/libs/bootstrap/3.3.2/plugins/jquery.blockUI-2.56.0/jquery.blockUI.js"></script><script src="/a/js/fpe/jquery.dataTables.min.js"></script><script src="/a/js/fpe/dataTables.select.min.js"></script><script src="/a/js/general/jquery_alert.js"></script><script src="/a/js/general/jquery_plugin.js"></script><script src="/a/js/general/jqueryvalidate_methods.js"></script><script src="/a/js/general/moment-with-locales.js"></script><script src="/a/js/general/bootstrap-datetimepicker-3.1.4.min.js"></script><script src="/a/js/general/inputmask_extended.js"></script><script src="/a/js/general/jquery.form.min.js"></script><script src="/a/js/general/jquery.qtip.min.js"></script><script src="/a/js/general/jquery.serializejson.min.js"></script><script src="/a/js/general/jquery.number.min.js"></script><script src="/a/js/general/common.js"></script><script src="/a/js/general/iniciadores.js"></script>
+-<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2" xmlns:sac="urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
 
 
-<script>
-$(document).ready(function() {
-    $("#formEnviarCorreo").validate({
-        rules:{
-            'correo': {
-                required: true,
-                email : true,
-            },
-        },
-        messages: {
-            'correo': {
-                required : "Ingrese un correo electrónico.",
-                email : "El correo electrónico ingresado no es válido.",
-            },
-        },
-        submitHandler: function(form) {
-           $.blockUI({message : "Enviando correo electrónico. Por favor espere.....", fadeIn: 0, baseZ: 2000});
-           var data =$("#formConstancia").serialize();
-           var correo=$("#correo").val();
-           $.ajax({
-               url: 'solicituddevolucion/enviarConstancia?correoElectronico=' + correo,
-               dataType:'JSON',
-               type: 'POST',
-               data: data,
-               cache: false,
-           }).done(function( respuesta ) {
-               var text1 = "Se ha enviado la constancia de devolución al correo ";
-               var mensaje = text1.concat(correo);
-               AlertDialog.showSuccess(mensaje);
-           }).error(function(xhr, status, text){ 
-              AlertDialog.showAJAXError(xhr, status, text);
-           }).complete(function(jqXHR, textStatus){
-                $.unblockUI(); // Fin de bloqueo
-           });
-            return false;
-        }
-    });
-    $( "#btnImprimir" ).click(function() {
-      window.print();
-    });
-    
-});
+-<ext:UBLExtensions>
 
 
-                 
-                  
-
-</script>
+-<ext:UBLExtension>
 
 
+-<ext:ExtensionContent>
 
-</body></html>
+
+-<ds:Signature Id="SignatureSP">
+
+
+-<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+
+<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+
+<SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+
+
+-<Reference URI="">
+
+
+-<Transforms>
+
+<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+
+</Transforms>
+
+<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+
+<DigestValue>w/MTsuPMdmAV6x362yo+WQj1ifzOLe7dnyiDSO7c2pw=</DigestValue>
+
+</Reference>
+
+</SignedInfo>
+
+<SignatureValue xmlns="http://www.w3.org/2000/09/xmldsig#">MndQXlzHj4Xjq1Xc8Y/oxcpz2pXir7fXEmk3KUvbqQ2SVxm4f2FwFilYdOlwWc/ctyDo5tAXvkbd1L2M4nkEjS1SPpoBx+mP6w/fv1VvzlNMoXVJnc7+MZE21MqRp8jAMH88p3EsLIdtFxWpmLbNz3Axjj49KuAxp0gMuJakQFqfGqx5+QypdY6cOQ6OinuPyh+IK2+O6hZZAAd91w/K+Yi5wXXhoy4kZissElybtmFxf1wWOs7CZTuWy/BIzEabSU7J7zKdeJ58Kl8mcFZsaQTYHmzdnyGOt6Oqmk61V84VTauD/YVdWWdH4W1Osx3dAWS2oDv1VbVmNBz+dfnCIg==</SignatureValue>
+
+
+-<KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+
+
+-<X509Data>
+
+<X509Certificate>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</X509Certificate>
+
+</X509Data>
+
+</KeyInfo>
+
+</ds:Signature>
+
+</ext:ExtensionContent>
+
+</ext:UBLExtension>
+
+</ext:UBLExtensions>
+
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+
+<cbc:CustomizationID>2.0</cbc:CustomizationID>
+
+<cbc:ID>T001-0000024</cbc:ID>
+
+<cbc:IssueDate>2026-07-21</cbc:IssueDate>
+
+<cbc:IssueTime>09:28:12</cbc:IssueTime>
+
+<cbc:DespatchAdviceTypeCode listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01" listName="Tipo de Documento" listAgencyName="PE:SUNAT">09</cbc:DespatchAdviceTypeCode>
+
+
+-<cac:Signature>
+
+<cbc:ID>T001-0000024</cbc:ID>
+
+
+-<cac:SignatoryParty>
+
+
+-<cac:PartyIdentification>
+
+<cbc:ID>20614628589</cbc:ID>
+
+</cac:PartyIdentification>
+
+
+-<cac:PartyName>
+
+
+-<cbc:Name>
+
+-<![CDATA[CAMARENA PERU EIRL]]>
+</cbc:Name>
+
+</cac:PartyName>
+
+</cac:SignatoryParty>
+
+
+-<cac:DigitalSignatureAttachment>
+
+
+-<cac:ExternalReference>
+
+<cbc:URI>#signatureKG </cbc:URI>
+
+</cac:ExternalReference>
+
+</cac:DigitalSignatureAttachment>
+
+</cac:Signature>
+
+
+-<cac:DespatchSupplierParty>
+
+
+-<cac:Party>
+
+
+-<cac:PartyIdentification>
+
+<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="6">20614628589</cbc:ID>
+
+</cac:PartyIdentification>
+
+
+-<cac:PartyName>
+
+
+-<cbc:Name>
+
+-<![CDATA[CAMARENA PERU EIRL]]>
+</cbc:Name>
+
+</cac:PartyName>
+
+
+-<cac:PartyLegalEntity>
+
+
+-<cbc:RegistrationName>
+
+-<![CDATA[CAMARENA PERU EIRL]]>
+</cbc:RegistrationName>
+
+</cac:PartyLegalEntity>
+
+</cac:Party>
+
+</cac:DespatchSupplierParty>
+
+
+-<cac:DeliveryCustomerParty>
+
+
+-<cac:Party>
+
+
+-<cac:PartyIdentification>
+
+<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="6">20604428701</cbc:ID>
+
+</cac:PartyIdentification>
+
+
+-<cac:PartyLegalEntity>
+
+
+-<cbc:RegistrationName>
+
+-<![CDATA[SEYCAR CONSTRUCCIONES E.I.R.L.]]>
+</cbc:RegistrationName>
+
+</cac:PartyLegalEntity>
+
+</cac:Party>
+
+</cac:DeliveryCustomerParty>
+
+
+-<cac:Shipment>
+
+<cbc:ID>SUNAT_Envio</cbc:ID>
+
+<cbc:HandlingCode listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo20" listName="Motivo de traslado" listAgencyName="PE:SUNAT">01</cbc:HandlingCode>
+
+<cbc:GrossWeightMeasure unitCode="KGM">1.00</cbc:GrossWeightMeasure>
+
+<cbc:SpecialInstructions>SUNAT_Envio_IndicadorTransbordoProgramado</cbc:SpecialInstructions>
+
+
+-<cac:ShipmentStage>
+
+<cbc:ID>1</cbc:ID>
+
+<cbc:TransportModeCode listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo18" listName="Modalidad de traslado" listAgencyName="PE:SUNAT">02</cbc:TransportModeCode>
+
+
+-<cac:TransitPeriod>
+
+<cbc:StartDate>2026-07-21</cbc:StartDate>
+
+</cac:TransitPeriod>
+
+
+-<cac:DriverPerson>
+
+<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="1">Q71653632</cbc:ID>
+
+<cbc:FirstName>JONATHAN DENIS</cbc:FirstName>
+
+<cbc:FamilyName>YURIVILCA MANUDJANO</cbc:FamilyName>
+
+<cbc:JobTitle>Principal</cbc:JobTitle>
+
+
+-<cac:IdentityDocumentReference>
+
+<cbc:ID>Q71653632</cbc:ID>
+
+</cac:IdentityDocumentReference>
+
+</cac:DriverPerson>
+
+</cac:ShipmentStage>
+
+
+-<cac:Delivery>
+
+
+-<cac:DeliveryAddress>
+
+<cbc:ID schemeAgencyName="PE:INEI" schemeName="Ubigeos">100902</cbc:ID>
+
+
+-<cac:AddressLine>
+
+
+-<cbc:Line>
+
+-<![CDATA[JR. COMERCIO NRO. S/N C.P.  CODO DEL POZUZO  (A MEDIA CDRA. DEL PARQUE INFANTIL)]]>
+</cbc:Line>
+
+</cac:AddressLine>
+
+</cac:DeliveryAddress>
+
+
+-<cac:Despatch>
+
+
+-<cac:DespatchAddress>
+
+<cbc:ID schemeAgencyName="PE:INEI" schemeName="Ubigeos">120601</cbc:ID>
+
+
+-<cac:AddressLine>
+
+
+-<cbc:Line>
+
+-<![CDATA[AV. LA CULTURA 701 INTERIOR 24 JUNIO PUESTO 63 NRO. 701 OTR. MERCADO PRODUCTORES SANTA ANITA LIMA - LIMA - SANTA ANITA]]>
+</cbc:Line>
+
+</cac:AddressLine>
+
+</cac:DespatchAddress>
+
+</cac:Despatch>
+
+</cac:Delivery>
+
+
+-<cac:TransportHandlingUnit>
+
+
+-<cac:TransportEquipment>
+
+<cbc:ID>TOH886</cbc:ID>
+
+</cac:TransportEquipment>
+
+</cac:TransportHandlingUnit>
+
+</cac:Shipment>
+
+
+-<cac:DespatchLine>
+
+<cbc:ID>1</cbc:ID>
+
+<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">400</cbc:DeliveredQuantity>
+
+
+-<cac:OrderLineReference>
+
+<cbc:LineID>1</cbc:LineID>
+
+</cac:OrderLineReference>
+
+
+-<cac:Item>
+
+
+-<cbc:Description>
+
+-<![CDATA[PILSEN CERVEZA X 355 ML X 12 UNI]]>
+</cbc:Description>
+
+
+-<cac:SellersItemIdentification>
+
+<cbc:ID>PILS0001</cbc:ID>
+
+</cac:SellersItemIdentification>
+
+</cac:Item>
+
+</cac:DespatchLine>
+
+
+-<cac:DespatchLine>
+
+<cbc:ID>2</cbc:ID>
+
+<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">500</cbc:DeliveredQuantity>
+
+
+-<cac:OrderLineReference>
+
+<cbc:LineID>2</cbc:LineID>
+
+</cac:OrderLineReference>
+
+
+-<cac:Item>
+
+
+-<cbc:Description>
+
+-<![CDATA[SPORADE TROPICAL X 500 ML X 12 UNID]]>
+</cbc:Description>
+
+
+-<cac:SellersItemIdentification>
+
+<cbc:ID>SPOR0001</cbc:ID>
+
+</cac:SellersItemIdentification>
+
+</cac:Item>
+
+</cac:DespatchLine>
+
+</DespatchAdvice>
