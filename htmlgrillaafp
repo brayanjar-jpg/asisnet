@@ -33,13 +33,13 @@
 
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
 
-<DigestValue>w/MTsuPMdmAV6x362yo+WQj1ifzOLe7dnyiDSO7c2pw=</DigestValue>
+<DigestValue>5Y95zi7y7ru+3Im06WENyut0jR28GY2m0csokob/Dig=</DigestValue>
 
 </Reference>
 
 </SignedInfo>
 
-<SignatureValue xmlns="http://www.w3.org/2000/09/xmldsig#">MndQXlzHj4Xjq1Xc8Y/oxcpz2pXir7fXEmk3KUvbqQ2SVxm4f2FwFilYdOlwWc/ctyDo5tAXvkbd1L2M4nkEjS1SPpoBx+mP6w/fv1VvzlNMoXVJnc7+MZE21MqRp8jAMH88p3EsLIdtFxWpmLbNz3Axjj49KuAxp0gMuJakQFqfGqx5+QypdY6cOQ6OinuPyh+IK2+O6hZZAAd91w/K+Yi5wXXhoy4kZissElybtmFxf1wWOs7CZTuWy/BIzEabSU7J7zKdeJ58Kl8mcFZsaQTYHmzdnyGOt6Oqmk61V84VTauD/YVdWWdH4W1Osx3dAWS2oDv1VbVmNBz+dfnCIg==</SignatureValue>
+<SignatureValue xmlns="http://www.w3.org/2000/09/xmldsig#">EYR5Vx7Tjmw8Y4Hp4LxGY1JmzCN3a/3vE6t3TgKhqmA91x+TSdlV2Uue6Dx7JYIT0wVoInFqRSAc66yY5wwOtOLoVRcDBNfjVMaHBaJPgdPs4F5Rxa3wENze30AnoFfBveD5roeAT2L2c/p7GlAbEDIxjj580fl1xPtiJJ7JhHr1Ffcw0VWVOWzqJdVhOdMSg1pxr0K1H8Gs7rm0st58aXiwH1nv6PzCLi8BzA9O5yZg5KdGTEty7aYNxO4xb5F2pTi95rxzzVfPk8ZH7s/B42kbinla2n3lhFDbUc2GumBbeHkYFRQ+LQgK2PS2sJzF1xbtyFBaRjKaqLPx6VBI8Q==</SignatureValue>
 
 
 -<KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
@@ -65,18 +65,18 @@
 
 <cbc:CustomizationID>2.0</cbc:CustomizationID>
 
-<cbc:ID>T001-0000024</cbc:ID>
+<cbc:ID>T001-0000036</cbc:ID>
 
-<cbc:IssueDate>2026-07-21</cbc:IssueDate>
+<cbc:IssueDate>2026-09-05</cbc:IssueDate>
 
-<cbc:IssueTime>09:28:12</cbc:IssueTime>
+<cbc:IssueTime>15:56:45</cbc:IssueTime>
 
 <cbc:DespatchAdviceTypeCode listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01" listName="Tipo de Documento" listAgencyName="PE:SUNAT">09</cbc:DespatchAdviceTypeCode>
 
 
 -<cac:Signature>
 
-<cbc:ID>T001-0000024</cbc:ID>
+<cbc:ID>T001-0000036</cbc:ID>
 
 
 -<cac:SignatoryParty>
@@ -163,7 +163,7 @@
 
 -<cac:PartyIdentification>
 
-<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="6">20604428701</cbc:ID>
+<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="6">20601401968</cbc:ID>
 
 </cac:PartyIdentification>
 
@@ -173,7 +173,7 @@
 
 -<cbc:RegistrationName>
 
--<![CDATA[SEYCAR CONSTRUCCIONES E.I.R.L.]]>
+-<![CDATA[MULTISERVICIOS & TRANSPORTES YEDIVIC E.I.R.L.]]>
 </cbc:RegistrationName>
 
 </cac:PartyLegalEntity>
@@ -203,25 +203,25 @@
 
 -<cac:TransitPeriod>
 
-<cbc:StartDate>2026-07-21</cbc:StartDate>
+<cbc:StartDate>2026-09-05</cbc:StartDate>
 
 </cac:TransitPeriod>
 
 
 -<cac:DriverPerson>
 
-<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="1">Q71653632</cbc:ID>
+<cbc:ID schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06" schemeAgencyName="PE:SUNAT" schemeName="Documento de Identidad" schemeID="1">28203759</cbc:ID>
 
-<cbc:FirstName>JONATHAN DENIS</cbc:FirstName>
+<cbc:FirstName>GREGORIO</cbc:FirstName>
 
-<cbc:FamilyName>YURIVILCA MANUDJANO</cbc:FamilyName>
+<cbc:FamilyName>LAURA ORIUNDO</cbc:FamilyName>
 
 <cbc:JobTitle>Principal</cbc:JobTitle>
 
 
 -<cac:IdentityDocumentReference>
 
-<cbc:ID>Q71653632</cbc:ID>
+<cbc:ID>S28203759</cbc:ID>
 
 </cac:IdentityDocumentReference>
 
@@ -235,7 +235,7 @@
 
 -<cac:DeliveryAddress>
 
-<cbc:ID schemeAgencyName="PE:INEI" schemeName="Ubigeos">100902</cbc:ID>
+<cbc:ID schemeAgencyName="PE:INEI" schemeName="Ubigeos">050115</cbc:ID>
 
 
 -<cac:AddressLine>
@@ -243,7 +243,7 @@
 
 -<cbc:Line>
 
--<![CDATA[JR. COMERCIO NRO. S/N C.P.  CODO DEL POZUZO  (A MEDIA CDRA. DEL PARQUE INFANTIL)]]>
+-<![CDATA[CAR.HUANTA HUANCAYO NRO. S/N ASC. TOTORA (COSTADO DE GRIFO PLAZA) AYACUCHO - HUAMANGA - JESUS NAZARE]]>
 </cbc:Line>
 
 </cac:AddressLine>
@@ -281,7 +281,7 @@
 
 -<cac:TransportEquipment>
 
-<cbc:ID>TOH886</cbc:ID>
+<cbc:ID>DS0730</cbc:ID>
 
 </cac:TransportEquipment>
 
@@ -294,7 +294,7 @@
 
 <cbc:ID>1</cbc:ID>
 
-<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">400</cbc:DeliveredQuantity>
+<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">50</cbc:DeliveredQuantity>
 
 
 -<cac:OrderLineReference>
@@ -309,13 +309,13 @@
 
 -<cbc:Description>
 
--<![CDATA[PILSEN CERVEZA X 355 ML X 12 UNI]]>
+-<![CDATA[CUSQUEÑA NEGRA X 355 X 6 UNI]]>
 </cbc:Description>
 
 
 -<cac:SellersItemIdentification>
 
-<cbc:ID>PILS0001</cbc:ID>
+<cbc:ID>CUSQ0005</cbc:ID>
 
 </cac:SellersItemIdentification>
 
@@ -328,7 +328,7 @@
 
 <cbc:ID>2</cbc:ID>
 
-<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">500</cbc:DeliveredQuantity>
+<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">90</cbc:DeliveredQuantity>
 
 
 -<cac:OrderLineReference>
@@ -343,13 +343,81 @@
 
 -<cbc:Description>
 
--<![CDATA[SPORADE TROPICAL X 500 ML X 12 UNID]]>
+-<![CDATA[CUSQUEÑA TRIGO X 355 X 6 UNI]]>
 </cbc:Description>
 
 
 -<cac:SellersItemIdentification>
 
-<cbc:ID>SPOR0001</cbc:ID>
+<cbc:ID>CUSQ0001</cbc:ID>
+
+</cac:SellersItemIdentification>
+
+</cac:Item>
+
+</cac:DespatchLine>
+
+
+-<cac:DespatchLine>
+
+<cbc:ID>3</cbc:ID>
+
+<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">100</cbc:DeliveredQuantity>
+
+
+-<cac:OrderLineReference>
+
+<cbc:LineID>3</cbc:LineID>
+
+</cac:OrderLineReference>
+
+
+-<cac:Item>
+
+
+-<cbc:Description>
+
+-<![CDATA[PILSEN CERVEZA X 355 ML X 6 UNID]]>
+</cbc:Description>
+
+
+-<cac:SellersItemIdentification>
+
+<cbc:ID>PILS0005</cbc:ID>
+
+</cac:SellersItemIdentification>
+
+</cac:Item>
+
+</cac:DespatchLine>
+
+
+-<cac:DespatchLine>
+
+<cbc:ID>4</cbc:ID>
+
+<cbc:DeliveredQuantity unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">256</cbc:DeliveredQuantity>
+
+
+-<cac:OrderLineReference>
+
+<cbc:LineID>4</cbc:LineID>
+
+</cac:OrderLineReference>
+
+
+-<cac:Item>
+
+
+-<cbc:Description>
+
+-<![CDATA[SAN CARLOS S/ GAS  AGUA X 500 ML X 20 UNID]]>
+</cbc:Description>
+
+
+-<cac:SellersItemIdentification>
+
+<cbc:ID>SANC0001</cbc:ID>
 
 </cac:SellersItemIdentification>
 
