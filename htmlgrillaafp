@@ -1,38 +1,10 @@
-* =====================================================================
-* PARTE 1: EVENTO CLICK - BOTÓN BARRIDO COMPRAS (RCE CONTROL CO_1070)
-* =====================================================================
-LOCAL lcPeriodoRaw, lcMesTexto, lcAnoTexto, lcPeriodoSunat, lcConnectionString
-LOCAL lnHandle, lnResult, lcSQL, lcComando, lnContador, lcArchivoResult
-LOCAL lcContenido, nLineas, lnFilaTotalC, lcLineaFila, nColsFila, i
-LOCAL lnRegistrosProcesados, lnIdProceso
-* ?? EL ANCLA DEFINITIVA: Declaración forzada de matrices con tamaño inicial
-LOCAL aLineas[1], aValFila[1], laError[1]
+LOCAL lcConnectionString, lnHandle, lcSQL1, lcSQL2, lnResult1, lnResult2
+LOCAL lnTotalEmpresas, lnTotalTrabajadores, lnTotalAFP
+LOCAL ARRAY laError[1]
 
-* 1. VALIDACIÓN DEL PERIODO EN FORMATO MM/AAAA
-lcPeriodoRaw = ALLTRIM(ThisForm.pageframe1.page1.Text1.Value)
-lcPeriodoRaw = STRTRAN(lcPeriodoRaw, "/", "")
-lcPeriodoRaw = STRTRAN(lcPeriodoRaw, " ", "") 
-
-IF LEN(lcPeriodoRaw) != 6 OR NOT ISDIGIT(lcPeriodoRaw)
-    MESSAGEBOX("Ingrese un periodo válido en formato MM/AAAA (Ej: 08/2026).", 48, "Validación")
-    ThisForm.pageframe1.page1.Text1.SetFocus()
-    RETURN
-ENDIF
-
-lcMesTexto = LEFT(lcPeriodoRaw, 2)  
-lcAnoTexto = RIGHT(lcPeriodoRaw, 4) 
-lcPeriodoSunat = lcAnoTexto + lcMesTexto 
-
-IF NOT USED("curSireMensual") OR RECCOUNT("curSireMensual") = 0
-    MESSAGEBOX("No hay empresas cargadas en la plantilla maestra para procesar.", 64, "Aviso")
-    RETURN
-ENDIF
-
-IF MESSAGEBOX("¿Desea iniciar el barrido masivo de COMPRAS con filtro inteligente de SUNAT?", 36, "Procesamiento Masivo") != 6
-    RETURN
-ENDIF
-
-* 2. CONEXIÓN CON SUPABASE
+* =========================================================================
+* 1. CADENA DE CONEXIÓN ÚNICA Y CONFIGURACIÓN DE ENTORNO
+* =========================================================================
 lcConnectionString = "Driver={PostgreSQL ANSI(x86)};" + ;
                      "Server=aws-0-sa-east-1.pooler.supabase.com;" + ;
                      "Port=5432;" + ;
@@ -42,352 +14,200 @@ lcConnectionString = "Driver={PostgreSQL ANSI(x86)};" + ;
                      "SSLmode=require;" + ;
                      "ConnSettings=SET client_encoding TO 'UTF8';"
 
+=SQLSETPROP(0, "ConnectTimeOut", 15)
+=SQLSETPROP(0, "DispLogin", 3)
 
 lnHandle = SQLSTRINGCONNECT(lcConnectionString)
 
-IF lnHandle <= 0
-    =AERROR(laError)
-    MESSAGEBOX("Error de conexión con Supabase: " + laError(2), 16, "Error")
-    RETURN
-ELSE
-    =SQLEXEC(lnHandle, "SET TIME ZONE 'America/Lima';")
-ENDIF
-
-lnRegistrosProcesados = 0
-SELECT curSireMensual
-GO TOP
-
-* 3. BUCLE DE RECORRIDO COMPLETO DE LA GRILLA
-SCAN
-    lnRegistrosProcesados = lnRegistrosProcesados + 1
-    WAIT WINDOW "Procesando Compras (" + ALLTRIM(STR(lnRegistrosProcesados)) + "/" + ALLTRIM(STR(RECCOUNT("curSireMensual"))) + ") - RUC: " + ALLTRIM(curSireMensual.ruc) + "..." NOWAIT
+IF lnHandle > 0
+    * ---------------------------------------------------------------------
+    * CONSULTA DE EMPRESAS -> GRID 1 (PAGE 1)
+    * ---------------------------------------------------------------------
+    lcSQL1 = "SELECT * FROM v_empresas_pdt0601 ORDER BY ultimo_digito ASC, ruc ASC;"
+    lnResult1 = SQLEXEC(lnHandle, lcSQL1, "curEmpresasPdt")
     
-    lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'EN PROCESO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-    =SQLEXEC(lnHandle, lcSQL)
-    
-* =========================================================================
-* CONSULTA CORREGIDA: DO NOTHING garantiza que RETURNING id devuelva el ID de compras (360)
-* =========================================================================
-lcSQL = "INSERT INTO proceso_resumen_sire_compras (empresa_id, periodo_animes, estado_barrido) " + ;
-        "VALUES (" + ALLTRIM(STR(curSireMensual.id)) + ", " + lcPeriodoSunat + ", 'PENDIENTE') " + ;
-        "ON CONFLICT (empresa_id, periodo_animes) DO NOTHING " + ; && <- Cambiado a DO NOTHING
-        "RETURNING id;"
-
-lnResult = SQLEXEC(lnHandle, lcSQL, "curIdBusqueda")
-
-* PostgreSQL devuelve NULL en RETURNING id si se ejecuta un DO NOTHING en un registro existente.
-* Por lo tanto, si curIdBusqueda llega vacío, hacemos un SELECT rápido para capturar el ID real de compras.
-IF lnResult > 0 AND USED("curIdBusqueda") AND RECCOUNT("curIdBusqueda") > 0 AND !ISNULL(curIdBusqueda.id)
-    lnIdProceso = curIdBusqueda.id
-    USE IN curIdBusqueda
-ELSE
-    * Si ya existía, lo buscamos directamente por empresa y periodo en la tabla de compras
-    IF USED("curIdBusqueda")
-        USE IN curIdBusqueda
-    ENDIF
-    
-    lcSQLBusqueda = "SELECT id FROM proceso_resumen_sire_compras " + ;
-                    "WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + " " + ;
-                    "AND periodo_animes = " + lcPeriodoSunat + ";"
-    =SQLEXEC(lnHandle, lcSQLBusqueda, "curIdReal")
-    
-    IF USED("curIdReal") AND RECCOUNT("curIdReal") > 0
-        lnIdProceso = curIdReal.id
-        USE IN curIdReal
-    ELSE
-        IF USED("curIdReal")
-            USE IN curIdReal
-        ENDIF
-        LOOP && Si no se pudo crear ni buscar, saltar al siguiente cliente
-    ENDIF
-ENDIF
-
-    
-    lcArchivoResult = "D:\SIRE\resultado_resumen_compras.txt"
-    IF FILE(lcArchivoResult)
-        DELETE FILE (lcArchivoResult)
-    ENDIF
-
-    lcComando = 'cmd.exe /c python D:\SIRE\resumen_rce.py ' + ;
-        '"compras" "' + lcPeriodoSunat + '" "' + ALLTRIM(curSireMensual.ruc) + '" "' + ;
-        ALLTRIM(curSireMensual.usuario_sol) + '" "' + ALLTRIM(curSireMensual.clave_sol) + '" "' + ;
-        ALLTRIM(curSireMensual.client_id) + '" "' + ALLTRIM(curSireMensual.client_secret) + '"'
+    IF lnResult1 > 0
+        SELECT curEmpresasPdt
+        COUNT TO lnTotalEmpresas
+        ThisForm.pageframe1.page1.text1.Value = lnTotalEmpresas
+        GO TOP
         
-DECLARE INTEGER WinExec IN win32api STRING lpCmdLine, INTEGER nCmdShow
-=WinExec(lcComando, 0)  && cambia a 1 si necesitas ver la ventana para depurar
-
-    lnContador = 0
-    DO WHILE !FILE(lcArchivoResult) AND lnContador < 150
-        =INKEY(0.1, "H")
-        lnContador = lnContador + 1
-    ENDDO
-
-    * 4. EVALUACIÓN INTELIGENTE DE RESPUESTAS SUNAT
-    IF FILE(lcArchivoResult)
-        lcContenido = FILETOSTR(lcArchivoResult)
-        nLineas = ALINES(aLineas, lcContenido)
+        ThisForm.pageframe1.page1.Grid1.RecordSource = ""
+        ThisForm.pageframe1.page1.Grid1.RecordSourceType = 1
+        ThisForm.pageframe1.page1.Grid1.RecordSource     = "curEmpresasPdt"
         
-        * ?? CONTROL SOBERANO: Analizar si el archivo reporta un ERROR de la SUNAT
-        IF nLineas >= 1 AND "ERROR" $ UPPER(aLineas[1])
+        WITH ThisForm.pageframe1.page1.Grid1
+            .ColumnCount = 7  
+            .Columns(1).ControlSource = "curEmpresasPdt.ruc"
+            .Columns(2).ControlSource = "curEmpresasPdt.nombre"
+            .Columns(3).ControlSource = "curEmpresasPdt.usuario_sol"
+            .Columns(4).ControlSource = "curEmpresasPdt.clave_sol"
+            .Columns(5).ControlSource = "curEmpresasPdt.obligado_desde"
+            .Columns(6).ControlSource = "curEmpresasPdt.total_trabajadores"
             
-            * ?? SI EL ERROR ES PORQUE NO HAY COMPROBANTES (CÓDIGO 1070), SE INYECTAN ZEROS CON ÉXITO
-            IF "1070" $ lcContenido OR "NO SE HA ENCONTRADO INFORMACI" $ UPPER(lcContenido)
-                lcSQL = "UPDATE proceso_resumen_sire_compras SET " + ;
-                        "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = 0, " + ;
-                        "bi_gravado_dg = 0.00, igv_ipm_dg = 0.00, valor_adq_ng = 0.00, total_cp = 0.00 " + ;
-                        "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-                
-                lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-            ELSE
-                * Si es un error real de Clave SOL, Token API, etc., se marca como ERROR CREDENCIALES
-                lcSQL = "UPDATE proceso_resumen_sire_compras SET estado_barrido = 'ERROR LOGIN', updated_at = NOW() WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-                
-                lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'ERR CREDENCIAL' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-            ENDIF
-        ELSE
-            * ?? SI EL ARCHIVO VIENE VACÍO POR TIMEOUT PERO SIN ALERTA DE ERROR DE LOGIN
-            IF nLineas < 2 OR LEN(ALLTRIM(lcContenido)) < 5 OR "SIN OPER" $ UPPER(lcContenido)
-                lcSQL = "UPDATE proceso_resumen_sire_compras SET " + ;
-                        "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = 0, " + ;
-                        "bi_gravado_dg = 0.00, igv_ipm_dg = 0.00, valor_adq_ng = 0.00, total_cp = 0.00 " + ;
-                        "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-                
-                lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-            ELSE
-                * --- PROCESAMIENTO ESTÁNDAR SI EL ARCHIVO TRAE LA FILA TOTAL ---
-                lnFilaTotalC = 0
-                FOR i = 2 TO nLineas
-                    IF LEFT(UPPER(ALLTRIM(aLineas[i])), 5) == "TOTAL"
-                        lnFilaTotalC = i
-                        EXIT
-                    ENDIF
-                ENDFOR
-                
-                IF lnFilaTotalC = 0
-                    lnFilaTotalC = nLineas
-                ENDIF
-                
-                lcLineaFila = aLineas[lnFilaTotalC]
-                nColsFila = ALINES(aValFila, STRTRAN(lcLineaFila, "|", CHR(13)))
-                
-                IF nColsFila >= 13 AND LEFT(UPPER(ALLTRIM(aValFila)), 5) == "TOTAL"
-                    lcSQL = "UPDATE proceso_resumen_sire_compras SET " + ;
-                            "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = " + ALLTRIM(aValFila) + ", " + ;
-                            "bi_gravado_dg = " + ALLTRIM(STR(VAL(ALLTRIM(aValFila)), 12, 2)) + ", " + ;
-                            "igv_ipm_dg = " + ALLTRIM(STR(VAL(ALLTRIM(aValFila)), 12, 2)) + ", " + ;
-                            "valor_adq_ng = " + ALLTRIM(STR(VAL(ALLTRIM(aValFila)), 12, 2)) + ", " + ;
-                            "total_cp = " + ALLTRIM(STR(VAL(ALLTRIM(aValFila)), 12, 2)) + " " + ;
-                            "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                    =SQLEXEC(lnHandle, lcSQL)
-                    
-                    lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                    =SQLEXEC(lnHandle, lcSQL)
-                ENDIF
-            ENDIF
-        ENDIF
-        DELETE FILE (lcArchivoResult)
-    ELSE
-        * Timeout general por caída del servicio web de SUNAT o corte de luz/internet
-        lcSQL = "UPDATE proceso_resumen_sire_compras SET " + ;
-                "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = 0, " + ;
-                "bi_gravado_dg = 0.00, igv_ipm_dg = 0.00, valor_adq_ng = 0.00, total_cp = 0.00 " + ;
-                "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-        =SQLEXEC(lnHandle, lcSQL)
-        
-        lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-        =SQLEXEC(lnHandle, lcSQL)
-    ENDIF
-ENDSCAN
-
-=SQLDISCONNECT(lnHandle)
-WAIT CLEAR
-ThisForm.CargarGridsResumen()
-MESSAGEBOX("Barrido masivo de Compras finalizado con éxito y descarte automático de 0 movimientos.", 64, "Mensaje")
-* =====================================================================
-* PARTE 2: EVENTO CLICK - BOTÓN BARRIDO VENTAS (RVIE CONTROL CO_1070)
-* =====================================================================
-LOCAL lcPeriodoRaw, lcMesTexto, lcAnoTexto, lcPeriodoSunat, lcConnectionString
-LOCAL lnHandle, lnResult, lcSQL, lcComando, lnContador, lcArchivoResult
-LOCAL lcContenido, nLineas, lnFilaTotalV, lcLineaFila, nColsFila, i
-LOCAL lnRegistrosProcesados, lnIdProceso
-* ?? EL ANCLA DEFINITIVA: Declaración forzada de matrices con tamaño inicial
-LOCAL aLineas[1], aValFila[1], laError[1]
-
-lcPeriodoRaw = ALLTRIM(ThisForm.pageframe1.page1.Text1.Value)
-lcPeriodoRaw = STRTRAN(lcPeriodoRaw, "/", "")
-lcPeriodoRaw = STRTRAN(lcPeriodoRaw, " ", "") 
-
-IF LEN(lcPeriodoRaw) != 6 OR NOT ISDIGIT(lcPeriodoRaw)
-    MESSAGEBOX("Ingrese un periodo válido en formato MM/AAAA (Ej: 08/2026).", 48, "Validación")
-    ThisForm.pageframe1.page1.Text1.SetFocus()
-    RETURN
-ENDIF
-
-lcMesTexto = LEFT(lcPeriodoRaw, 2)  
-lcAnoTexto = RIGHT(lcPeriodoRaw, 4) 
-lcPeriodoSunat = lcAnoTexto + lcMesTexto 
-
-IF NOT USED("curSireMensual") OR RECCOUNT("curSireMensual") = 0
-    MESSAGEBOX("No hay empresas cargadas en la plantilla maestra.", 64, "Aviso")
-    RETURN
-ENDIF
-
-IF MESSAGEBOX("¿Desea iniciar el barrido masivo de VENTAS con filtro inteligente de SUNAT?", 36, "Procesamiento Masivo") != 6
-    RETURN
-ENDIF
-
-lcConnectionString = "Driver={PostgreSQL ANSI(x86)};" + ;
-                     "Server=aws-0-sa-east-1.pooler.supabase.com;" + ;
-                     "Port=5432;" + ;
-                     "Database=postgres;" + ;
-                     "UID=postgres.atryivflkhjsynrqzora;" + ;
-                     "PWD=Angelo2862*12;" + ;
-                     "SSLmode=require;" + ;
-                     "ConnSettings=SET client_encoding TO 'UTF8';"
-
-
-lnHandle = SQLSTRINGCONNECT(lcConnectionString)
-
-IF lnHandle <= 0
-    =AERROR(laError)
-    MESSAGEBOX("Error de conexión con Supabase: " + laError(2), 16, "Error")
-    RETURN
-ELSE
-    =SQLEXEC(lnHandle, "SET TIME ZONE 'America/Lima';")
-ENDIF
-
-lnRegistrosProcesados = 0
-SELECT curSireMensual
-GO TOP
-
-SCAN
-    lnRegistrosProcesados = lnRegistrosProcesados + 1
-    WAIT WINDOW "Procesando Ventas (" + ALLTRIM(STR(lnRegistrosProcesados)) + "/" + ALLTRIM(STR(RECCOUNT("curSireMensual"))) + ") - RUC: " + ALLTRIM(curSireMensual.ruc) + "..." NOWAIT
-    
-    lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'EN PROCESO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-    =SQLEXEC(lnHandle, lcSQL)
-    
-    lcSQL = "INSERT INTO proceso_resumen_sire_ventas (empresa_id, periodo_animes, estado_barrido) " + ;
-            "VALUES (" + ALLTRIM(STR(curSireMensual.id)) + ", " + lcPeriodoSunat + ", 'PENDIENTE') " + ;
-            "ON CONFLICT (empresa_id, periodo_animes) DO UPDATE SET empresa_id = EXCLUDED.empresa_id " + ;
-            "RETURNING id;"
-    lnResult = SQLEXEC(lnHandle, lcSQL, "curIdBusquedaV")
-    
-    IF lnResult > 0 AND USED("curIdBusquedaV") AND RECCOUNT("curIdBusquedaV") > 0
-        lnIdProceso = curIdBusquedaV.id
-        USE IN curIdBusquedaV
-    ELSE
-        IF USED("curIdBusquedaV")
-            USE IN curIdBusquedaV
-        ENDIF
-        LOOP
-    ENDIF
-    
-    lcArchivoResult = "D:\SIRE\resultado_resumen_ventas.txt"
-    IF FILE(lcArchivoResult)
-        DELETE FILE (lcArchivoResult)
-    ENDIF
-
-    lcComando = 'cmd.exe /c python D:\SIRE\resumen_rvie.py ' + ;
-        '"ventas" "' + lcPeriodoSunat + '" "' + ALLTRIM(curSireMensual.ruc) + '" "' + ;
-        ALLTRIM(curSireMensual.usuario_sol) + '" "' + ALLTRIM(curSireMensual.clave_sol) + '" "' + ;
-        ALLTRIM(curSireMensual.client_id) + '" "' + ALLTRIM(curSireMensual.client_secret) + '"'
-        
-    =WinExec(lcComando, 0)
-
-    lnContador = 0
-    DO WHILE !FILE(lcArchivoResult) AND lnContador < 150
-        =INKEY(0.1, "H")
-        lnContador = lnContador + 1
-    ENDDO
-
-    * 4. EVALUACIÓN INTELIGENTE DE RESPUESTAS SUNAT
-    IF FILE(lcArchivoResult)
-        lcContenido = FILETOSTR(lcArchivoResult)
-        nLineas = ALINES(aLineas, lcContenido)
-        
-        IF nLineas >= 1 AND "ERROR" $ UPPER(aLineas[1])
+            .Columns(1).Header1.Caption = "RUC"
+            .Columns(2).Header1.Caption = "Razón Social / Nombre"
+            .Columns(3).Header1.Caption = "Usuario SOL"
+            .Columns(4).Header1.Caption = "Clave SOL"
+            .Columns(5).Header1.Caption = "Obligado Desde"
+            .Columns(6).Header1.Caption = "Trab. Activos"
+            .Columns(7).Header1.Caption = "Afecto"  
             
-            * ?? SI EL ERROR ES PORQUE NO HAY COMPROBANTES (CÓDIGO 1070), SE INYECTAN ZEROS CON ÉXITO
-            IF "1070" $ lcContenido OR "NO SE HA ENCONTRADO INFORMACI" $ UPPER(lcContenido)
-                lcSQL = "UPDATE proceso_resumen_sire_ventas SET " + ;
-                        "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = 0, " + ;
-                        "base_imponible_gravada = 0.00, descuento_base_imponible = 0.00, monto_igv_ipm = 0.00, descuento_igv_ipm = 0.00, importe_total_cp = 0.00 " + ;
-                        "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-                
-                lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-            ELSE
-                lcSQL = "UPDATE proceso_resumen_sire_ventas SET estado_barrido = 'ERROR LOGIN', updated_at = NOW() WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-                
-                lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'ERR CREDENCIAL' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-            ENDIF
-        ELSE
-            IF nLineas < 2 OR LEN(ALLTRIM(lcContenido)) < 5 OR "SIN OPER" $ UPPER(lcContenido)
-                lcSQL = "UPDATE proceso_resumen_sire_ventas SET " + ;
-                        "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = 0, " + ;
-                        "base_imponible_gravada = 0.00, descuento_base_imponible = 0.00, monto_igv_ipm = 0.00, descuento_igv_ipm = 0.00, importe_total_cp = 0.00 " + ;
-                        "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-                
-                lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                =SQLEXEC(lnHandle, lcSQL)
-            ELSE
-                * --- PROCESAMIENTO ESTÁNDAR SI EL ARCHIVO TRAE LA FILA TOTAL ---
-                lnFilaTotalV = 0
-                FOR i = 2 TO nLineas
-                    IF LEFT(UPPER(ALLTRIM(aLineas[i])), 5) == "TOTAL"
-                        lnFilaTotalV = i
-                        EXIT
-                    ENDIF
-                ENDFOR
-                
-                IF lnFilaTotalV = 0
-                    lnFilaTotalV = nLineas
-                ENDIF
-                
-                lcLineaFila = aLineas[lnFilaTotalV]
-                nColsFila = ALINES(aValVentas, STRTRAN(lcLineaFila, "|", CHR(13)))
-                
-                IF nColsFila >= 15 AND LEFT(UPPER(ALLTRIM(aValVentas)), 5) == "TOTAL"
-                    lcSQL = "UPDATE proceso_resumen_sire_ventas SET " + ;
-                            "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = " + ALLTRIM(aValVentas) + ", " + ;
-                            "base_imponible_gravada = " + ALLTRIM(STR(VAL(ALLTRIM(aValVentas)), 12, 2)) + ", " + ;
-                            "descuento_base_imponible = " + ALLTRIM(STR(VAL(ALLTRIM(aValVentas)), 12, 2)) + ", " + ;
-                            "monto_igv_ipm = " + ALLTRIM(STR(VAL(ALLTRIM(aValVentas)), 12, 2)) + ", " + ;
-                            "descuento_igv_ipm = " + ALLTRIM(STR(VAL(ALLTRIM(aValVentas)), 12, 2)) + ", " + ;
-                            "importe_total_cp = " + ALLTRIM(STR(VAL(ALLTRIM(aValVentas)), 12, 2)) + " " + ;
-                            "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-                    =SQLEXEC(lnHandle, lcSQL)
-                    
-                    lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-                    =SQLEXEC(lnHandle, lcSQL)
-                ENDIF
-            ENDIF
-        ENDIF
-        DELETE FILE (lcArchivoResult)
+            .Columns(1).Width = 95
+            .Columns(2).Width = 230
+            .Columns(3).Width = 85
+            .Columns(4).Width = 85
+            .Columns(5).Width = 90
+            .Columns(6).Width = 80
+            .Columns(7).Width = 50  
+            .Columns(6).Alignment = 2 
+            .HeaderHeight = 25        
+            .RowHeight    = 22        
+            .HighlightStyle = 2
+            .Refresh()
+        ENDWITH
     ELSE
-        lcSQL = "UPDATE proceso_resumen_sire_ventas SET " + ;
-                "estado_barrido = 'PROCESADO', updated_at = NOW(), total_documentos = 0, " + ;
-                "base_imponible_gravada = 0.00, descuento_base_imponible = 0.00, monto_igv_ipm = 0.00, descuento_igv_ipm = 0.00, importe_total_cp = 0.00 " + ;
-                "WHERE id = " + ALLTRIM(STR(lnIdProceso)) + ";"
-        =SQLEXEC(lnHandle, lcSQL)
-        
-        lcSQL = "UPDATE plantilla_resumen_sire SET estado_barrido = 'PROCESADO' WHERE empresa_id = " + ALLTRIM(STR(curSireMensual.id)) + ";"
-        =SQLEXEC(lnHandle, lcSQL)
+        AERROR(laError)
+        MESSAGEBOX("Error al consultar Grid1: " + laError(2), 16, "Error")
     ENDIF
-ENDSCAN
+    * ---------------------------------------------------------------------
+    * CONSULTA DE TRABAJADORES -> GRID 2 (PAGE 2) y GRID 1 (PAGE 3)
+    * ---------------------------------------------------------------------
+    lcSQL2 = "SELECT " + ;
+             "CAST(ruc_empresa AS varchar(11)) as ruc_empresa, " + ;
+             "CAST(dni AS varchar(15)) as dni, " + ;
+             "CAST(nombres_completos AS varchar(150)) as nombres_completos, " + ;
+             "CAST(fecha_nacimiento AS varchar(20)) as fecha_nacimiento, " + ;
+             "CAST(sexo AS varchar(20)) as sexo, " + ;
+             "CAST(estado_sunat AS varchar(50)) as estado_sunat, " + ;
+             "CAST(fecha_inicio_labores AS varchar(20)) as fecha_inicio_labores, " + ;
+             "CAST(regimen_pensionario AS varchar(150)) as regimen_pensionario, " + ; 
+             "CAST(cuspp AS varchar(50)) as cuspp, " + ;
+             "CAST(remuneracion_basica AS numeric(10,2)) as remun_basica " + ; 
+             "FROM v_comprobante_tregistro " + ;
+             "ORDER BY RIGHT(CAST(ruc_empresa AS varchar(11)), 1) ASC, ruc_empresa ASC, fecha_inicio_labores ASC;"
 
-=SQLDISCONNECT(lnHandle)
-WAIT CLEAR
-ThisForm.CargarGridsResumen()
-MESSAGEBOX("Barrido masivo de Ventas finalizado con éxito y descarte automático de 0 movimientos.", 64, "Mensaje")
+    lnResult2 = SQLEXEC(lnHandle, lcSQL2, "curDescargaRaw")
+    
+    IF lnResult2 > 0
+        * Romper campos MEMO forzando a variables de longitud de cadena estática (C)
+        SELECT CAST(ruc_empresa AS C(11)) as ruc_empresa, ;
+               CAST(dni AS C(15)) as dni, ;
+               PADR(nombres_completos, 120) as nombres_completos, ; 
+               CAST(fecha_nacimiento AS C(20)) as fecha_nacimiento, ;
+               CAST(sexo AS C(20)) as sexo, ;
+               CAST(estado_sunat AS C(50)) as estado_sunat, ;
+               CAST(fecha_inicio_labores AS C(20)) as fecha_inicio_labores, ;
+               PADR(regimen_pensionario, 120) as regimen_pensionario, ; 
+               CAST(cuspp AS C(50)) as cuspp, ;
+               remun_basica ;
+          FROM curDescargaRaw ;
+          INTO CURSOR curComprobantes READWRITE
+          
+        USE IN curDescargaRaw 
+        
+        * ASIGNACIÓN A PAGE 2: TODOS LOS TRABAJADORES
+        SELECT curComprobantes
+        COUNT TO lnTotalTrabajadores
+        ThisForm.pageframe1.page2.text1.Value = lnTotalTrabajadores
+        GO TOP
+        
+        ThisForm.pageframe1.page2.Grid2.RecordSource = ""
+        ThisForm.pageframe1.page2.Grid2.RecordSourceType = 1
+        ThisForm.pageframe1.page2.Grid2.RecordSource     = "curComprobantes"
+        
+        WITH ThisForm.pageframe1.page2.Grid2
+            .ColumnCount = 7  
+            .Columns(1).ControlSource = "curComprobantes.ruc_empresa"
+            .Columns(2).ControlSource = "curComprobantes.dni"
+            .Columns(3).ControlSource = "curComprobantes.nombres_completos" 
+            .Columns(4).ControlSource = "curComprobantes.fecha_nacimiento"
+            .Columns(5).ControlSource = "curComprobantes.sexo"
+            .Columns(6).ControlSource = "curComprobantes.estado_sunat"
+            .Columns(7).ControlSource = "curComprobantes.fecha_inicio_labores"
+            
+            .Columns(1).Header1.Caption = "RUC"
+            .Columns(2).Header1.Caption = "DNI / N° Doc"
+            .Columns(3).Header1.Caption = "Nombres Completos"
+            .Columns(4).Header1.Caption = "Fecha Nac."
+            .Columns(5).Header1.Caption = "Sexo"
+            .Columns(6).Header1.Caption = "Estado Sunat"
+            .Columns(7).Header1.Caption = "F. Inicio Labores"
+            
+            .Columns(1).Width = 90
+            .Columns(2).Width = 90
+            .Columns(3).Width = 230
+            .Columns(4).Width = 90
+            .Columns(5).Width = 90
+            .Columns(6).Width = 100
+            .Columns(7).Width = 100
+            .HeaderHeight = 25        
+            .RowHeight    = 22        
+            .HighlightStyle = 2
+            .Refresh()
+        ENDWITH
+
+        * ASIGNACIÓN A PAGE 3: SOLO TRABAJADORES AFP (9 columnas)
+  SELECT * ;
+    FROM curComprobantes ;
+    WHERE "SPP" $ UPPER(regimen_pensionario) ;
+    INTO CURSOR curTrabajadoresAfp READWRITE
+            
+        SELECT curTrabajadoresAfp
+        COUNT TO lnTotalAFP
+        ThisForm.pageframe1.page3.text1.Value = lnTotalAFP
+        GO TOP
+            
+        ThisForm.pageframe1.page3.Grid1.RecordSource = ""
+        ThisForm.pageframe1.page3.Grid1.RecordSourceType = 1
+        ThisForm.pageframe1.page3.Grid1.RecordSource     = "curTrabajadoresAfp"
+        
+        WITH ThisForm.pageframe1.page3.Grid1
+            .ColumnCount = 9  
+            .Columns(1).ControlSource = "curTrabajadoresAfp.ruc_empresa"
+            .Columns(2).ControlSource = "curTrabajadoresAfp.dni"
+            .Columns(3).ControlSource = "curTrabajadoresAfp.nombres_completos" 
+            .Columns(4).ControlSource = "curTrabajadoresAfp.estado_sunat"
+            .Columns(5).ControlSource = "curTrabajadoresAfp.fecha_inicio_labores"
+            .Columns(6).ControlSource = "curTrabajadoresAfp.remun_basica"        
+            .Columns(7).ControlSource = "curTrabajadoresAfp.regimen_pensionario" 
+            .Columns(8).ControlSource = "curTrabajadoresAfp.cuspp"              
+            .Columns(9).ControlSource = "curTrabajadoresAfp.sexo"               
+            
+            .Columns(1).Header1.Caption = "RUC"
+            .Columns(2).Header1.Caption = "DNI / N° Doc"
+            .Columns(3).Header1.Caption = "Nombres Completos"
+            .Columns(4).Header1.Caption = "Estado"
+            .Columns(5).Header1.Caption = "F. Inicio"
+            .Columns(6).Header1.Caption = "Básico S/."
+            .Columns(7).Header1.Caption = "AFP / Régimen"
+            .Columns(8).Header1.Caption = "Código CUSPP"
+            .Columns(9).Header1.Caption = "Sexo"
+            
+            .Columns(1).Width = 90
+            .Columns(2).Width = 85
+            .Columns(3).Width = 200
+            .Columns(4).Width = 85
+            .Columns(5).Width = 85
+            .Columns(6).Width = 80   
+            .Columns(7).Width = 120  
+            .Columns(8).Width = 100  
+            .Columns(9).Width = 50
+            .Columns(6).Alignment = 1 
+            .HeaderHeight = 25        
+            .RowHeight    = 22        
+            .HighlightStyle = 2
+            .Refresh()
+        ENDWITH
+    ELSE
+        AERROR(laError)
+        MESSAGEBOX("Error al consultar trabajadores: " + laError(2), 16, "Error")
+    ENDIF
+    
+    =SQLDISCONNECT(lnHandle)
+ELSE
+    AERROR(laError)
+    MESSAGEBOX("Falló la conexión unificada a Supabase: " + laError(2), 16, "Error de Conexión")
+ENDIF
+
+ThisForm.Refresh()
